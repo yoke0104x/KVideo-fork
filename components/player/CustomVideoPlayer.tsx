@@ -41,11 +41,13 @@ export function CustomVideoPlayer({
   const [showSkipBackwardIndicator, setShowSkipBackwardIndicator] = useState(false);
   const [isSkipForwardAnimatingOut, setIsSkipForwardAnimatingOut] = useState(false);
   const [isSkipBackwardAnimatingOut, setIsSkipBackwardAnimatingOut] = useState(false);
+  const [showVolumeBar, setShowVolumeBar] = useState(false);
   
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const speedMenuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const skipForwardTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const skipBackwardTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const volumeBarTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isDraggingProgressRef = useRef(false);
   const isDraggingVolumeRef = useRef(false);
 
@@ -200,6 +202,21 @@ export function CustomVideoPlayer({
     }
   };
 
+  // Show volume bar temporarily
+  const showVolumeBarTemporarily = () => {
+    setShowVolumeBar(true);
+    
+    // Clear existing timeout
+    if (volumeBarTimeoutRef.current) {
+      clearTimeout(volumeBarTimeoutRef.current);
+    }
+    
+    // Hide after 1 second
+    volumeBarTimeoutRef.current = setTimeout(() => {
+      setShowVolumeBar(false);
+    }, 1000);
+  };
+
   const handleVolumeChange = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!videoRef.current || !volumeBarRef.current) return;
     
@@ -306,23 +323,23 @@ export function CustomVideoPlayer({
       clearTimeout(skipBackwardTimeoutRef.current);
     }
     
-    // Clear existing timeout
+    // Clear existing timeout to reset the fade out timer
     if (skipForwardTimeoutRef.current) {
       clearTimeout(skipForwardTimeoutRef.current);
     }
     
-    // Calculate new skip amount
-    const newSkipAmount = skipForwardAmount + 10;
+    // Calculate new skip amount (accumulate if already showing)
+    const newSkipAmount = showSkipForwardIndicator ? skipForwardAmount + 10 : 10;
     setSkipForwardAmount(newSkipAmount);
     setShowSkipForwardIndicator(true);
     setIsSkipForwardAnimatingOut(false);
     
-    // Apply the accumulated skip immediately to video
+    // Apply the skip to video
     const targetTime = Math.min(videoRef.current.currentTime + 10, duration);
     videoRef.current.currentTime = targetTime;
     setCurrentTime(targetTime);
     
-    // Start fade out animation after 300ms
+    // Start fade out animation after 800ms of inactivity
     skipForwardTimeoutRef.current = setTimeout(() => {
       setIsSkipForwardAnimatingOut(true);
       // Hide indicator after animation completes (200ms)
@@ -331,7 +348,7 @@ export function CustomVideoPlayer({
         setSkipForwardAmount(0);
         setIsSkipForwardAnimatingOut(false);
       }, 200);
-    }, 300);
+    }, 800);
   };
 
   const skipBackward = () => {
@@ -345,23 +362,23 @@ export function CustomVideoPlayer({
       clearTimeout(skipForwardTimeoutRef.current);
     }
     
-    // Clear existing timeout
+    // Clear existing timeout to reset the fade out timer
     if (skipBackwardTimeoutRef.current) {
       clearTimeout(skipBackwardTimeoutRef.current);
     }
     
-    // Calculate new skip amount
-    const newSkipAmount = skipBackwardAmount + 10;
+    // Calculate new skip amount (accumulate if already showing)
+    const newSkipAmount = showSkipBackwardIndicator ? skipBackwardAmount + 10 : 10;
     setSkipBackwardAmount(newSkipAmount);
     setShowSkipBackwardIndicator(true);
     setIsSkipBackwardAnimatingOut(false);
     
-    // Apply the accumulated skip immediately to video
+    // Apply the skip to video
     const targetTime = Math.max(videoRef.current.currentTime - 10, 0);
     videoRef.current.currentTime = targetTime;
     setCurrentTime(targetTime);
     
-    // Start fade out animation after 300ms
+    // Start fade out animation after 800ms of inactivity
     skipBackwardTimeoutRef.current = setTimeout(() => {
       setIsSkipBackwardAnimatingOut(true);
       // Hide indicator after animation completes (200ms)
@@ -370,7 +387,7 @@ export function CustomVideoPlayer({
         setSkipBackwardAmount(0);
         setIsSkipBackwardAnimatingOut(false);
       }, 200);
-    }, 300);
+    }, 800);
   };
 
   // Cleanup timeout on unmount
@@ -382,8 +399,95 @@ export function CustomVideoPlayer({
       if (skipBackwardTimeoutRef.current) {
         clearTimeout(skipBackwardTimeoutRef.current);
       }
+      if (volumeBarTimeoutRef.current) {
+        clearTimeout(volumeBarTimeoutRef.current);
+      }
     };
   }, []);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input field
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return;
+      }
+
+      // Prevent default for our shortcuts
+      const shortcuts = [' ', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'f', 'F', 'm', 'M', 'i', 'I', '<', '>', ',', '.'];
+      if (shortcuts.includes(e.key)) {
+        e.preventDefault();
+      }
+
+      switch (e.key) {
+        // Playback control
+        case ' ': // Spacebar: Play/pause
+          togglePlay();
+          break;
+        
+        case 'ArrowLeft': // Left arrow: Rewind 10 seconds
+        case '<': // <: Rewind 10 seconds
+        case ',': // Comma key
+          skipBackward();
+          break;
+        
+        case 'ArrowRight': // Right arrow: Fast-forward 10 seconds
+        case '>': // >: Fast-forward 10 seconds
+        case '.': // Period key
+          skipForward();
+          break;
+
+        // Volume
+        case 'm': // M: Mute/unmute
+        case 'M':
+          toggleMute();
+          showVolumeBarTemporarily();
+          break;
+        
+        case 'ArrowUp': // Up arrow: Increase volume by 5%
+          if (videoRef.current) {
+            const newVolume = Math.min(1, volume + 0.05);
+            setVolume(newVolume);
+            videoRef.current.volume = newVolume;
+            setIsMuted(newVolume === 0);
+            showVolumeBarTemporarily();
+          }
+          break;
+        
+        case 'ArrowDown': // Down arrow: Decrease volume by 5%
+          if (videoRef.current) {
+            const newVolume = Math.max(0, volume - 0.05);
+            setVolume(newVolume);
+            videoRef.current.volume = newVolume;
+            setIsMuted(newVolume === 0);
+            showVolumeBarTemporarily();
+          }
+          break;
+
+        // Display
+        case 'f': // F: Toggle full-screen mode
+        case 'F':
+          toggleFullscreen();
+          break;
+        
+        case 'i': // I: Toggle miniplayer (Picture-in-Picture)
+        case 'I':
+          if (isPiPSupported) {
+            togglePictureInPicture();
+          }
+          break;
+      }
+    };
+
+    // Add event listener
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isPlaying, volume, isMuted, isPiPSupported, togglePlay, toggleMute, toggleFullscreen, togglePictureInPicture, skipForward, skipBackward, showVolumeBarTemporarily]); // Include dependencies
 
   // Playback speed
   const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
@@ -576,7 +680,11 @@ export function CustomVideoPlayer({
                 </button>
 
                 {/* Volume Bar */}
-                <div className="flex items-center gap-2 opacity-0 w-0 group-hover/volume:opacity-100 group-hover/volume:w-32 overflow-hidden transition-all duration-300">
+                <div className={`flex items-center gap-2 overflow-hidden transition-all duration-300 ${
+                  showVolumeBar 
+                    ? 'opacity-100 w-32' 
+                    : 'opacity-0 w-0 group-hover/volume:opacity-100 group-hover/volume:w-32'
+                }`}>
                   <div 
                     ref={volumeBarRef}
                     className="slider-track h-1 cursor-pointer flex-1"
