@@ -46,12 +46,13 @@ export function VideoGrid({ videos, className = '' }: VideoGridProps) {
               className={`p-0 overflow-hidden group cursor-pointer flex flex-col h-full ${video.isNew ? 'animate-scale-in' : ''}`}
             >
               {/* Poster */}
-              <div className="relative aspect-[2/3] bg-[color-mix(in_srgb,var(--glass-bg)_50%,transparent)] overflow-hidden" style={{ borderRadius: 'var(--radius-2xl) var(--radius-2xl) 0 0' }}>
+              <div className="relative aspect-[2/3] bg-[color-mix(in_srgb,var(--glass-bg)_50%,transparent)] overflow-hidden" style={{ borderRadius: 'var(--radius-2xl)' }}>
                 {video.vod_pic ? (
                   <img
                     src={video.vod_pic}
                     alt={video.vod_name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    style={{ borderRadius: 'var(--radius-2xl)' }}
                     loading="lazy"
                   />
                 ) : (

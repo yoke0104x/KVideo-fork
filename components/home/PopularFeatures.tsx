@@ -254,12 +254,13 @@ export function PopularFeatures({ onSearch }: PopularFeaturesProps) {
             className="group cursor-pointer"
           >
             <Card hover className="overflow-hidden p-0 h-full">
-              <div className="relative aspect-[2/3] overflow-hidden bg-[var(--glass-bg)]">
+              <div className="relative aspect-[2/3] overflow-hidden bg-[var(--glass-bg)]" style={{ borderRadius: 'var(--radius-2xl)' }}>
                 <Image
                   src={movie.cover}
                   alt={movie.title}
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  style={{ borderRadius: 'var(--radius-2xl)' }}
                   sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
                 />
                 {movie.rate && parseFloat(movie.rate) > 0 && (
