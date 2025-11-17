@@ -80,8 +80,8 @@ function PlayerContent() {
   return (
     <div className="min-h-screen bg-[var(--bg-color)]">
       {/* Glass Navbar */}
-      <nav className="sticky top-4 z-50 mx-4 mt-4 mb-8">
-        <div className="max-w-7xl mx-auto bg-[var(--glass-bg)] backdrop-blur-[25px] saturate-[180%] border border-[var(--glass-border)] rounded-[var(--radius-2xl)] shadow-[0_4px_12px_color-mix(in_srgb,var(--shadow-color)_40%,transparent)] px-6 py-4">
+      <nav className="sticky top-0 z-50 pt-4 pb-2">
+        <div className="max-w-7xl mx-auto mx-4 bg-[var(--glass-bg)] backdrop-blur-[25px] saturate-[180%] border border-[var(--glass-border)] rounded-[var(--radius-2xl)] shadow-[0_4px_12px_color-mix(in_srgb,var(--shadow-color)_40%,transparent)] px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button 
