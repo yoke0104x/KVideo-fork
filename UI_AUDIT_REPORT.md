@@ -663,8 +663,8 @@ export const announceToScreenReader = (message: string) => {
 - ✅ 焦点项自动滚动到视图内，优化用户体验
 
 #### 7. **图片加载优化** (预计 2 小时)
-- [ ] 创建 `public/placeholder-poster.svg` 占位图
-- [ ] **VideoGrid.tsx** - 添加 `onError` 处理
+- [x] 创建 `public/placeholder-poster.svg` 占位图
+- [x] **VideoGrid.tsx** - 添加 `onError` 处理
   ```tsx
   <img
     src={video.vod_pic}
@@ -673,13 +673,13 @@ export const announceToScreenReader = (message: string) => {
     }}
   />
   ```
-- [ ] **WatchHistorySidebar.tsx** - 同样添加 `onError`
-- [ ] **PopularFeatures.tsx** - 添加 `onError`
+- [x] **WatchHistorySidebar.tsx** - 同样添加 `onError`
+- [x] **PopularFeatures.tsx** - 添加 `onError`
 
 #### 8. **性能优化 - GPU 加速** (预计 1 小时)
-- [ ] 给所有 hover scale 动画添加 `will-change-transform`
-- [ ] 给 fixed/sticky 元素添加 `transform: translateZ(0)`
-- [ ] 优化 `SearchLoadingAnimation` 的 shimmer 动画
+- [x] 给所有 hover scale 动画添加 `will-change-transform`
+- [x] 给 fixed/sticky 元素添加 `transform: translateZ(0)`
+- [x] 优化 `SearchLoadingAnimation` 的 shimmer 动画
 
 ---
 

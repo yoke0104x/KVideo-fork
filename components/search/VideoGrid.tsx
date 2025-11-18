@@ -127,9 +127,12 @@ export function VideoGrid({ videos, className = '' }: VideoGridProps) {
                   <img
                     src={video.vod_pic}
                     alt={video.vod_name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 will-change-transform"
                     style={{ borderRadius: 'var(--radius-2xl)' }}
                     loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.src = '/placeholder-poster.svg';
+                    }}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">

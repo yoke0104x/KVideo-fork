@@ -42,7 +42,7 @@ export function TypeBadgeItem({
         text-xs font-medium whitespace-nowrap
         transition-all duration-[var(--transition-fluid)]
         hover:scale-105 hover:shadow-[var(--shadow-sm)]
-        active:scale-95 snap-start
+        active:scale-95 snap-start will-change-transform
         ${isSelected 
           ? 'bg-[var(--accent-color)] text-white border-[var(--accent-color)]' 
           : 'bg-[var(--glass-bg)] text-[var(--text-color)] backdrop-blur-[10px]'

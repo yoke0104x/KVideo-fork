@@ -5,9 +5,10 @@ interface CardProps {
   className?: string;
   hover?: boolean;
   onClick?: () => void;
+  style?: React.CSSProperties;
 }
 
-export function Card({ children, className = '', hover = true, onClick }: CardProps) {
+export function Card({ children, className = '', hover = true, onClick, style }: CardProps) {
   const hoverStyles = hover 
     ? "hover:translate-y-[-5px] hover:scale-[1.02] hover:shadow-[0_8px_24px_var(--shadow-color)] cursor-pointer transition-all duration-[var(--transition-fluid)]" 
     : "transition-all duration-[var(--transition-fluid)]";
@@ -34,6 +35,7 @@ export function Card({ children, className = '', hover = true, onClick }: CardPr
         type="button"
         onClick={onClick}
         className={`${baseClasses} text-left w-full`}
+        style={style}
       >
         {children}
       </button>
@@ -42,7 +44,7 @@ export function Card({ children, className = '', hover = true, onClick }: CardPr
 
   // Use div for non-interactive cards
   return (
-    <div className={baseClasses}>
+    <div className={baseClasses} style={style}>
       {children}
     </div>
   );

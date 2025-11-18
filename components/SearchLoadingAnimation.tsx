@@ -56,14 +56,21 @@ export function SearchLoadingAnimation({
           style={{ borderRadius: 'var(--radius-full)' }}
         >
           <div
-            className="h-full bg-[var(--accent-color)] transition-all duration-500 ease-out relative"
+            className="h-full bg-[var(--accent-color)] transition-all duration-500 ease-out relative will-change-[width]"
             style={{ 
               width: `${progress}%`,
-              borderRadius: 'var(--radius-full)'
+              borderRadius: 'var(--radius-full)',
+              transform: 'translateZ(0)'
             }}
           >
-            {/* Shimmer Effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
+            {/* Shimmer Effect - Optimized for GPU */}
+            <div 
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"
+              style={{ 
+                willChange: 'transform',
+                transform: 'translateZ(0)'
+              }}
+            ></div>
           </div>
         </div>
         

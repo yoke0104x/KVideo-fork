@@ -37,9 +37,21 @@ export function MovieCard({ movie, onMovieClick }: MovieCardProps) {
             src={movie.cover}
             alt={movie.title}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            className="object-cover transition-transform duration-500 group-hover:scale-110 will-change-transform"
             style={{ borderRadius: 'var(--radius-2xl)' }}
             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+            onError={(e) => {
+              const target = e.currentTarget as HTMLImageElement;
+              target.style.display = 'none';
+              const parent = target.parentElement;
+              if (parent) {
+                const fallback = document.createElement('img');
+                fallback.src = '/placeholder-poster.svg';
+                fallback.alt = movie.title;
+                fallback.style.cssText = 'width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-2xl);';
+                parent.appendChild(fallback);
+              }
+            }}
           />
           {movie.rate && parseFloat(movie.rate) > 0 && (
             <div 
