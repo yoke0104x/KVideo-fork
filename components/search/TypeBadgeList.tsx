@@ -6,9 +6,10 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { Icons } from '@/components/ui/Icon';
 import { TypeBadgeItem } from './TypeBadgeItem';
+import { useKeyboardNavigation } from '@/lib/hooks/useKeyboardNavigation';
 
 interface TypeBadge {
   type: string;
@@ -23,21 +24,54 @@ interface TypeBadgeListProps {
 
 export function TypeBadgeList({ badges, selectedTypes, onToggleType }: TypeBadgeListProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const badgeRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // Keyboard navigation
+  useKeyboardNavigation({
+    enabled: true,
+    containerRef: containerRef,
+    currentIndex: focusedIndex,
+    itemCount: badges.length,
+    orientation: 'horizontal',
+    onNavigate: useCallback((index: number) => {
+      setFocusedIndex(index);
+      badgeRefs.current[index]?.focus();
+      // Scroll into view for mobile
+      badgeRefs.current[index]?.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'nearest',
+        inline: 'center',
+      });
+    }, []),
+    onSelect: useCallback((index: number) => {
+      onToggleType(badges[index].type);
+    }, [badges, onToggleType]),
+  });
 
   return (
     <>
       {/* Desktop: Expandable Grid */}
-      <div className="hidden md:flex md:flex-col md:flex-1">
+      <div 
+        ref={containerRef}
+        className="hidden md:flex md:flex-col md:flex-1"
+        role="group"
+        aria-label="类型筛选"
+      >
         <div className={`flex items-center gap-2 flex-wrap transition-all duration-300 ${
           !isExpanded ? 'max-h-[2.5rem] overflow-hidden' : ''
         }`}>
-          {badges.map((badge) => (
+          {badges.map((badge, index) => (
             <TypeBadgeItem
               key={badge.type}
               type={badge.type}
               count={badge.count}
               isSelected={selectedTypes.has(badge.type)}
               onToggle={() => onToggleType(badge.type)}
+              isFocused={focusedIndex === index}
+              onFocus={() => setFocusedIndex(index)}
+              innerRef={(el) => { badgeRefs.current[index] = el; }}
             />
           ))}
         </div>
@@ -58,15 +92,25 @@ export function TypeBadgeList({ badges, selectedTypes, onToggleType }: TypeBadge
       </div>
 
       {/* Mobile & Tablet: Horizontal Scroll */}
-      <div className="flex md:hidden flex-1 overflow-hidden">
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
-          {badges.map((badge) => (
+      <div 
+        className="flex md:hidden flex-1 overflow-hidden"
+        role="group"
+        aria-label="类型筛选"
+      >
+        <div 
+          ref={containerRef}
+          className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory"
+        >
+          {badges.map((badge, index) => (
             <TypeBadgeItem
               key={badge.type}
               type={badge.type}
               count={badge.count}
               isSelected={selectedTypes.has(badge.type)}
               onToggle={() => onToggleType(badge.type)}
+              isFocused={focusedIndex === index}
+              onFocus={() => setFocusedIndex(index)}
+              innerRef={(el) => { badgeRefs.current[index] = el; }}
             />
           ))}
         </div>

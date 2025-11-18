@@ -620,26 +620,47 @@ export const announceToScreenReader = (message: string) => {
   - [✅] 添加 `role="list"` 到网格容器
   - [✅] 添加 `role="listitem"` 到每个卡片
 
-#### 6. **添加键盘导航支持** (预计 4 小时)
-- [ ] **VideoGrid.tsx**
-  - [ ] 添加 `onKeyDown` 处理 Enter/Space 键
-  - [ ] 实现方向键导航（上下左右）
-  - [ ] 添加 `tabIndex={0}` 到每个卡片
+#### 6. **添加键盘导航支持** (预计 4 小时) ✅ **已完成**
+- [x] **VideoGrid.tsx**
+  - [x] 添加 `onKeyDown` 处理 Enter/Space 键
+  - [x] 实现方向键导航（上下左右）
+  - [x] 添加 `tabIndex={0}` 到每个卡片
+  - [x] 添加 `aria-label` 描述性标签
+  - [x] 添加视觉焦点指示器 (ring)
 
-- [ ] **TypeBadges.tsx**
-  - [ ] 添加 `onKeyDown` 处理 Enter/Space 键
-  - [ ] 实现方向键在徽章间切换
-  - [ ] 添加 `role="group"` 和 `aria-label="类型筛选"`
+- [x] **TypeBadges.tsx**
+  - [x] 添加 `onKeyDown` 处理 Enter/Space 键
+  - [x] 实现方向键在徽章间切换
+  - [x] 添加 `role="group"` 和 `aria-label="类型筛选"`
+  - [x] 添加 `aria-pressed` 状态
+  - [x] 添加视觉焦点指示器
+  - [x] 支持移动端滚动到视图
 
-- [ ] **SearchHistoryDropdown.tsx**
-  - [ ] 添加方向键上下选择
-  - [ ] 添加 Escape 键关闭下拉框
-  - [ ] 添加 Home/End 键跳转首尾
+- [x] **SearchHistoryDropdown.tsx**
+  - [x] 添加方向键上下选择
+  - [x] 添加 Escape 键关闭下拉框
+  - [x] 添加 Home/End 键跳转首尾
+  - [x] 添加 `aria-selected` 状态
+  - [x] 添加视觉焦点指示器
+  - [x] 支持 Enter/Space 键选择
 
-- [ ] **EpisodeList.tsx**
-  - [ ] 添加方向键上下切换集数
-  - [ ] 添加 `role="radiogroup"`
-  - [ ] 当前集数添加 `aria-current="true"`
+- [x] **EpisodeList.tsx**
+  - [x] 添加方向键上下切换集数
+  - [x] 添加 `role="radiogroup"`
+  - [x] 当前集数添加 `aria-current="true"`
+  - [x] 添加 `role="radio"` 到每个按钮
+  - [x] 添加 `aria-checked` 状态
+  - [x] 添加 `focus-visible` 样式
+  - [x] 支持自动滚动到焦点项
+
+**实现细节**:
+- ✅ 创建了 `useKeyboardNavigation` 自定义 Hook，统一管理键盘导航逻辑
+- ✅ 支持三种导航模式：`horizontal`（水平）、`vertical`（垂直）、`grid`（网格）
+- ✅ 网格导航自动检测列数，支持响应式布局
+- ✅ 所有交互元素均添加 `tabIndex={0}` 支持键盘聚焦
+- ✅ 使用 `focus-visible:ring-2` 提供清晰的视觉焦点反馈
+- ✅ 完整的 ARIA 属性支持，符合 WAI-ARIA 标准
+- ✅ 焦点项自动滚动到视图内，优化用户体验
 
 #### 7. **图片加载优化** (预计 2 小时)
 - [ ] 创建 `public/placeholder-poster.svg` 占位图

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Icons } from '@/components/ui/Icon';
+import { useKeyboardNavigation } from '@/lib/hooks/useKeyboardNavigation';
 
 interface Video {
   vod_id: string;
@@ -25,6 +26,38 @@ interface VideoGridProps {
 
 export function VideoGrid({ videos, className = '' }: VideoGridProps) {
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const videoRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  
+  // Calculate columns for grid navigation
+  const getColumns = () => {
+    if (typeof window === 'undefined') return 7;
+    const width = window.innerWidth;
+    if (width >= 1536) return 7; // 2xl
+    if (width >= 1280) return 6; // xl
+    if (width >= 1024) return 5; // lg
+    if (width >= 768) return 4; // md
+    if (width >= 640) return 3; // sm
+    return 2; // default
+  };
+
+  // Keyboard navigation
+  useKeyboardNavigation({
+    enabled: true,
+    containerRef: gridRef,
+    currentIndex: focusedIndex,
+    itemCount: videos.length,
+    orientation: 'grid',
+    columns: getColumns(),
+    onNavigate: useCallback((index: number) => {
+      setFocusedIndex(index);
+      videoRefs.current[index]?.focus();
+    }, []),
+    onSelect: useCallback((index: number) => {
+      videoRefs.current[index]?.click();
+    }, []),
+  });
   
   if (videos.length === 0) {
     return null;
@@ -50,6 +83,7 @@ export function VideoGrid({ videos, className = '' }: VideoGridProps) {
 
   return (
     <div 
+      ref={gridRef}
       className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3 md:gap-4 lg:gap-6 ${className}`}
       role="list"
       aria-label="视频搜索结果"
@@ -63,16 +97,29 @@ export function VideoGrid({ videos, className = '' }: VideoGridProps) {
         
         const cardId = `${video.vod_id}-${index}`;
         const isActive = activeCardId === cardId;
+        const isFocused = focusedIndex === index;
         
         return (
           <Link 
             key={cardId}
             href={videoUrl}
+            ref={(el) => { videoRefs.current[index] = el; }}
             onClick={(e) => handleCardClick(e, cardId, videoUrl)}
+            onFocus={() => setFocusedIndex(index)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleCardClick(e as any, cardId, videoUrl);
+              }
+            }}
             role="listitem"
+            tabIndex={0}
+            aria-label={`${video.vod_name}${video.vod_remarks ? ` - ${video.vod_remarks}` : ''}`}
           >
             <Card
-              className={`p-0 overflow-hidden group cursor-pointer flex flex-col h-full ${video.isNew ? 'animate-scale-in' : ''}`}
+              className={`p-0 overflow-hidden group cursor-pointer flex flex-col h-full ${video.isNew ? 'animate-scale-in' : ''} ${
+                isFocused ? 'ring-2 ring-[var(--accent-color)] ring-offset-2' : ''
+              }`}
             >
               {/* Poster */}
               <div className="relative aspect-[2/3] bg-[color-mix(in_srgb,var(--glass-bg)_50%,transparent)] overflow-hidden" style={{ borderRadius: 'var(--radius-2xl)' }}>

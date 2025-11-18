@@ -8,12 +8,34 @@ interface TypeBadgeItemProps {
   count: number;
   isSelected: boolean;
   onToggle: () => void;
+  isFocused?: boolean;
+  onFocus?: () => void;
+  innerRef?: (el: HTMLButtonElement | null) => void;
 }
 
-export function TypeBadgeItem({ type, count, isSelected, onToggle }: TypeBadgeItemProps) {
+export function TypeBadgeItem({ 
+  type, 
+  count, 
+  isSelected, 
+  onToggle, 
+  isFocused = false,
+  onFocus,
+  innerRef,
+}: TypeBadgeItemProps) {
   return (
     <button
+      ref={innerRef}
       onClick={onToggle}
+      onFocus={onFocus}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onToggle();
+        }
+      }}
+      tabIndex={0}
+      aria-pressed={isSelected}
+      aria-label={`${type} 类型，${count} 个视频${isSelected ? '，已选中' : ''}`}
       className={`
         inline-flex items-center gap-1.5 px-3 py-1.5 
         border border-[var(--glass-border)]
@@ -24,6 +46,10 @@ export function TypeBadgeItem({ type, count, isSelected, onToggle }: TypeBadgeIt
         ${isSelected 
           ? 'bg-[var(--accent-color)] text-white border-[var(--accent-color)]' 
           : 'bg-[var(--glass-bg)] text-[var(--text-color)] backdrop-blur-[10px]'
+        }
+        ${isFocused 
+          ? 'ring-2 ring-[var(--accent-color)] ring-offset-2' 
+          : ''
         }
       `}
       style={{ borderRadius: 'var(--radius-full)' }}
