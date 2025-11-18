@@ -42,6 +42,9 @@ export function DesktopVideoPlayer({
   const [isSkipForwardAnimatingOut, setIsSkipForwardAnimatingOut] = useState(false);
   const [isSkipBackwardAnimatingOut, setIsSkipBackwardAnimatingOut] = useState(false);
   const [showVolumeBar, setShowVolumeBar] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const speedMenuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -51,6 +54,8 @@ export function DesktopVideoPlayer({
   const isDraggingProgressRef = useRef(false);
   const isDraggingVolumeRef = useRef(false);
   const mouseMoveThrottleRef = useRef<NodeJS.Timeout | null>(null);
+  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const moreMenuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check for PiP and AirPlay support
   useEffect(() => {
@@ -521,6 +526,32 @@ export function DesktopVideoPlayer({
     }
   };
 
+  // Show toast notification
+  const showToastNotification = (message: string) => {
+    setToastMessage(message);
+    setShowToast(true);
+    
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    
+    toastTimeoutRef.current = setTimeout(() => {
+      setShowToast(false);
+      setTimeout(() => setToastMessage(null), 300);
+    }, 3000);
+  };
+
+  // Copy video link
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(src);
+      showToastNotification('链接已复制到剪贴板');
+    } catch (error) {
+      console.error('Copy failed:', error);
+      showToastNotification('复制失败，请重试');
+    }
+  };
+
   // Auto-hide speed menu after 1.5s of inactivity
   const startSpeedMenuTimeout = () => {
     if (speedMenuTimeoutRef.current) {
@@ -793,6 +824,58 @@ export function DesktopVideoPlayer({
                 </button>
               )}
 
+              {/* More Menu */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowMoreMenu(!showMoreMenu)}
+                  onMouseEnter={() => {
+                    if (moreMenuTimeoutRef.current) {
+                      clearTimeout(moreMenuTimeoutRef.current);
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    moreMenuTimeoutRef.current = setTimeout(() => {
+                      setShowMoreMenu(false);
+                    }, 300);
+                  }}
+                  className="btn-icon"
+                  aria-label="More options"
+                  title="更多选项"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="1"/>
+                    <circle cx="12" cy="5" r="1"/>
+                    <circle cx="12" cy="19" r="1"/>
+                  </svg>
+                </button>
+
+                {/* More Menu Dropdown */}
+                {showMoreMenu && (
+                  <div 
+                    className="absolute bottom-full right-0 mb-2 bg-[var(--glass-bg)] backdrop-blur-[25px] saturate-[180%] rounded-[var(--radius-2xl)] border border-[var(--glass-border)] shadow-[var(--shadow-md)] p-2 min-w-[180px]"
+                    onMouseEnter={() => {
+                      if (moreMenuTimeoutRef.current) {
+                        clearTimeout(moreMenuTimeoutRef.current);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      setShowMoreMenu(false);
+                    }}
+                  >
+                    <button
+                      onClick={() => {
+                        setShowMoreMenu(false);
+                        handleCopyLink();
+                      }}
+                      className="w-full px-4 py-2.5 text-left text-sm text-[var(--text-color)] hover:bg-[color-mix(in_srgb,var(--accent-color)_15%,transparent)] rounded-[var(--radius-2xl)] transition-colors flex items-center gap-3"
+                    >
+                      <Icons.Link size={18} />
+                      <span>复制链接</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
               {/* Fullscreen */}
               <button
                 onClick={toggleFullscreen}
@@ -805,6 +888,16 @@ export function DesktopVideoPlayer({
           </div>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {showToast && toastMessage && (
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-[200] animate-slide-up">
+          <div className="bg-[rgba(28,28,30,0.95)] backdrop-blur-[25px] rounded-[var(--radius-2xl)] border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.6)] px-6 py-3 flex items-center gap-3 min-w-[200px]">
+            <Icons.Check size={18} className="text-[#34c759] flex-shrink-0" />
+            <span className="text-white text-sm font-medium">{toastMessage}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

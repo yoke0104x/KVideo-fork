@@ -40,6 +40,8 @@ export function MobileVideoPlayer({
   const [skipSide, setSkipSide] = useState<'left' | 'right' | null>(null);
   const [showSkipIndicator, setShowSkipIndicator] = useState(false);
   const [wasPlayingBeforeMenu, setWasPlayingBeforeMenu] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
   
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const skipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -47,6 +49,7 @@ export function MobileVideoPlayer({
   const menuIdleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const submenuIdleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isTogglingRef = useRef(false);
+  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Screen orientation management
   useScreenOrientation(isFullscreen);
@@ -398,6 +401,32 @@ export function MobileVideoPlayer({
     setShowSpeedMenu(false);
   };
 
+  // Show toast notification
+  const showToastNotification = (message: string) => {
+    setToastMessage(message);
+    setShowToast(true);
+    
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    
+    toastTimeoutRef.current = setTimeout(() => {
+      setShowToast(false);
+      setTimeout(() => setToastMessage(null), 300);
+    }, 3000);
+  };
+
+  // Copy video link
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(src);
+      showToastNotification('链接已复制到剪贴板');
+    } catch (error) {
+      console.error('Copy failed:', error);
+      showToastNotification('复制失败，请重试');
+    }
+  };
+
   const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
   
   const formatTime = (seconds: number) => {
@@ -509,6 +538,20 @@ export function MobileVideoPlayer({
                 {showMoreMenu && (
                   <div className="absolute bottom-full right-0 mb-2 min-w-[160px] z-[100] menu-container">
                     <div className="bg-[rgba(255,255,255,0.1)] backdrop-blur-[25px] rounded-[var(--radius-2xl)] border border-[rgba(255,255,255,0.2)] shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-hidden">
+                    {/* Copy Link Option */}
+                    <button 
+                      onClick={() => {
+                        setShowMoreMenu(false);
+                        handleCopyLink();
+                      }}
+                      className="w-full px-4 py-3 text-left text-sm text-white hover:bg-white/20 flex items-center gap-3 transition-all"
+                    >
+                      <Icons.Link size={18} />
+                      <span>复制链接</span>
+                    </button>
+
+                    <div className="h-px bg-white/10 my-1" />
+
                     {/* Volume Option */}
                     <button 
                       onClick={() => {
@@ -647,6 +690,16 @@ export function MobileVideoPlayer({
           )}
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {showToast && toastMessage && (
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[200] animate-slide-up">
+          <div className="bg-[rgba(28,28,30,0.95)] backdrop-blur-[25px] rounded-[var(--radius-2xl)] border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.6)] px-6 py-3 flex items-center gap-3 min-w-[200px] max-w-[90vw]">
+            <Icons.Check size={18} className="text-[#34c759] flex-shrink-0" />
+            <span className="text-white text-sm font-medium">{toastMessage}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
