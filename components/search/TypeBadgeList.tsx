@@ -55,12 +55,12 @@ export function TypeBadgeList({ badges, selectedTypes, onToggleType }: TypeBadge
       {/* Desktop: Expandable Grid */}
       <div 
         ref={containerRef}
-        className="hidden md:flex md:flex-col md:flex-1"
+        className="hidden md:flex md:flex-col md:flex-1 -mx-1 px-1"
         role="group"
         aria-label="类型筛选"
       >
         <div className={`flex items-center gap-2 flex-wrap transition-all duration-300 ${
-          !isExpanded ? 'max-h-[2.5rem] overflow-hidden' : ''
+          !isExpanded ? 'max-h-[3rem] overflow-hidden' : ''
         }`}>
           {badges.map((badge, index) => (
             <TypeBadgeItem
@@ -93,13 +93,13 @@ export function TypeBadgeList({ badges, selectedTypes, onToggleType }: TypeBadge
 
       {/* Mobile & Tablet: Horizontal Scroll */}
       <div 
-        className="flex md:hidden flex-1 overflow-hidden"
+        className="flex md:hidden flex-1 -mx-1 px-1"
         role="group"
         aria-label="类型筛选"
       >
         <div 
           ref={containerRef}
-          className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory"
+          className="flex items-center gap-2 overflow-x-auto overflow-y-visible pb-2 scrollbar-hide snap-x snap-mandatory"
         >
           {badges.map((badge, index) => (
             <TypeBadgeItem

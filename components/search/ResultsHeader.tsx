@@ -2,7 +2,6 @@
 
 import { Badge } from '@/components/ui/Badge';
 import { Icons } from '@/components/ui/Icon';
-import { SourceBadges } from './SourceBadges';
 
 interface ResultsHeaderProps {
   loading: boolean;
@@ -35,8 +34,6 @@ export function ResultsHeader({
           )}
         </div>
       </div>
-      
-      <SourceBadges sources={availableSources} />
     </div>
   );
 }
