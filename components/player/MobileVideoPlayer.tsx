@@ -77,38 +77,51 @@ export function MobileVideoPlayer({
     videoRef.current.currentTime = targetTime;
     setCurrentTime(targetTime);
     
-    // Hide indicator after 800ms
+    // Hide indicator after 1500ms of inactivity
     skipTimeoutRef.current = setTimeout(() => {
       setShowSkipIndicator(false);
       setSkipAmount(0);
       setSkipSide(null);
-    }, 800);
+    }, 1500);
   };
 
   // Double tap handler
   const { handleTap } = useDoubleTap({
     onDoubleTapLeft: () => skipVideo(10, 'left'),
     onDoubleTapRight: () => skipVideo(10, 'right'),
+    onSkipContinueLeft: () => skipVideo(10, 'left'),
+    onSkipContinueRight: () => skipVideo(10, 'right'),
+    isSkipModeActive: showSkipIndicator,
     onSingleTap: () => {
-      // Single tap in center: toggle play/pause
+      // Single tap toggles play/pause immediately
       togglePlay();
-      // Also show controls briefly
+      // Show controls
+      setShowControls(true);
+      // If playing, set timeout to hide controls
+      // If paused, keep controls visible
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+      if (isPlaying) {
+        controlsTimeoutRef.current = setTimeout(() => {
+          setShowControls(false);
+        }, 3000);
+      }
+    },
+  });
+
+  // Auto-hide controls only when playing
+  useEffect(() => {
+    // If paused, always show controls
+    if (!isPlaying) {
       setShowControls(true);
       if (controlsTimeoutRef.current) {
         clearTimeout(controlsTimeoutRef.current);
       }
-      controlsTimeoutRef.current = setTimeout(() => {
-        if (isPlaying) {
-          setShowControls(false);
-        }
-      }, 3000);
-    },
-  });
-
-  // Auto-hide controls
-  useEffect(() => {
-    if (!isPlaying) return;
+      return;
+    }
     
+    // If playing, auto-hide after 3 seconds
     const hideControls = () => {
       if (controlsTimeoutRef.current) {
         clearTimeout(controlsTimeoutRef.current);
@@ -171,16 +184,65 @@ export function MobileVideoPlayer({
     }
   };
 
-  // Progress bar seeking
-  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+  // Progress bar seeking with real-time drag
+  const updateProgressFromEvent = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement> | TouchEvent | MouseEvent) => {
     if (!videoRef.current || !progressBarRef.current) return;
     
     const rect = progressBarRef.current.getBoundingClientRect();
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const pos = (clientX - rect.left) / rect.width;
+    let clientX: number;
+    
+    // Handle both mouse and touch events
+    if ('touches' in e) {
+      const touch = e.touches[0] || (e as React.TouchEvent<HTMLDivElement>).changedTouches?.[0];
+      if (!touch) return;
+      clientX = touch.clientX;
+    } else {
+      clientX = (e as MouseEvent | React.MouseEvent<HTMLDivElement>).clientX;
+    }
+    
+    const pos = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
     const newTime = pos * duration;
-    videoRef.current.currentTime = newTime;
-    setCurrentTime(newTime);
+    
+    return newTime;
+  };
+
+  const handleProgressTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    isDraggingProgressRef.current = true;
+    const newTime = updateProgressFromEvent(e);
+    if (newTime !== undefined) {
+      setCurrentTime(newTime);
+    }
+  };
+
+  const handleProgressTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!isDraggingProgressRef.current) return;
+    e.preventDefault(); // Prevent scrolling while dragging
+    const newTime = updateProgressFromEvent(e);
+    if (newTime !== undefined) {
+      setCurrentTime(newTime);
+      // Update video in real-time
+      if (videoRef.current) {
+        videoRef.current.currentTime = newTime;
+      }
+    }
+  };
+
+  const handleProgressTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!isDraggingProgressRef.current) return;
+    isDraggingProgressRef.current = false;
+    const newTime = updateProgressFromEvent(e);
+    if (newTime !== undefined && videoRef.current) {
+      videoRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
+    }
+  };
+
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const newTime = updateProgressFromEvent(e);
+    if (newTime !== undefined && videoRef.current) {
+      videoRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
+    }
   };
 
   const toggleMute = () => {
@@ -300,7 +362,9 @@ export function MobileVideoPlayer({
             ref={progressBarRef}
             className="h-1 bg-white/30 rounded-full cursor-pointer"
             onClick={handleProgressClick}
-            onTouchEnd={handleProgressClick}
+            onTouchStart={handleProgressTouchStart}
+            onTouchMove={handleProgressTouchMove}
+            onTouchEnd={handleProgressTouchEnd}
           >
             <div 
               className="h-full bg-[var(--accent-color)] rounded-full relative"

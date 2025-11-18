@@ -23,10 +23,6 @@ export function SourceBadges({ sources, className = '' }: SourceBadgesProps) {
   return (
     <Card hover={false} className={`p-4 ${className}`}>
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-sm font-semibold text-[var(--text-color)] flex items-center gap-2">
-          <Icons.Check size={16} className="text-[var(--accent-color)]" />
-          可用源 ({sources.length}):
-        </span>
         {sources.map((source) => (
           <Badge 
             key={source.id} 
