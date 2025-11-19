@@ -54,7 +54,7 @@ async function withRetry<T>(
       return await fn();
     } catch (error) {
       lastError = error as Error;
-      
+
       if (i < retries) {
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (i + 1)));
       }
@@ -73,7 +73,7 @@ async function searchVideosBySource(
   page: number = 1
 ): Promise<{ results: VideoItem[]; source: string; responseTime: number }> {
   const startTime = Date.now();
-  
+
   const url = new URL(`${source.baseUrl}${source.searchPath}`);
   url.searchParams.set('ac', 'detail');
   url.searchParams.set('wd', query);
@@ -155,7 +155,7 @@ function parseEpisodes(playUrl: string): Episode[] {
   try {
     // Format: "Episode1$url1#Episode2$url2#..."
     const episodes = playUrl.split('#').filter(Boolean);
-    
+
     return episodes.map((episode, index) => {
       const [name, url] = episode.split('$');
       return {
@@ -200,11 +200,7 @@ export async function getVideoDetail(
 
     const data: ApiDetailResponse = await response.json();
 
-    console.log(`Video detail fetched from ${source.name}:`, {
-      id,
-      code: data.code,
-      hasData: !!data.list && data.list.length > 0
-    });
+
 
     if (data.code !== 1 && data.code !== 0) {
       throw new Error(data.msg || 'Invalid API response');
@@ -215,14 +211,14 @@ export async function getVideoDetail(
     }
 
     const videoData = data.list[0];
-    
+
     // Parse episodes from vod_play_url
     const episodes = parseEpisodes(videoData.vod_play_url || '');
 
-    console.log(`Parsed ${episodes.length} episodes for video ${id}`);
+
     if (episodes.length > 0) {
-      console.log('First episode URL:', episodes[0].url);
     }
+
 
     return {
       vod_id: videoData.vod_id,

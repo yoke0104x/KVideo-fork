@@ -22,10 +22,10 @@ export function useSearchCache() {
       availableSources: sources,
       timestamp: Date.now(),
     };
-    
+
     try {
       localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
-      console.log('💾 Saved search to cache:', query, results.length, 'results');
+
     } catch (error) {
       console.error('Failed to save cache:', error);
     }
@@ -35,15 +35,15 @@ export function useSearchCache() {
     try {
       const cached = localStorage.getItem(CACHE_KEY);
       if (!cached) return null;
-      
+
       const cache: SearchCache = JSON.parse(cached);
-      
+
       // Check if cache is still valid
       if (Date.now() - cache.timestamp > CACHE_DURATION) {
         localStorage.removeItem(CACHE_KEY);
         return null;
       }
-      
+
       return cache;
     } catch (error) {
       console.error('Failed to load cache:', error);

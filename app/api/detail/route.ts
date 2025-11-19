@@ -28,7 +28,7 @@ async function handleDetailRequest(id: string | null, source: string | null, met
   }
 
   const sourceConfig = getSourceById(source);
-  
+
   if (!sourceConfig) {
     return NextResponse.json(
       { error: 'Invalid source ID' },
@@ -39,18 +39,18 @@ async function handleDetailRequest(id: string | null, source: string | null, met
   // Fetch video detail without validation (already validated during search)
   try {
     const videoDetail = await getVideoDetail(id, sourceConfig);
-    
+
     // Skip validation - videos are already checked during search
     // Just return the episodes as-is
-    console.log(`[${method}] Fetching video details for ${id} from ${sourceConfig.name}`);
-    
+
+
     return NextResponse.json({
       success: true,
       data: videoDetail,
     });
   } catch (error) {
     console.error('Detail API error:', error);
-    
+
     return NextResponse.json(
       {
         success: false,
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     return await handleDetailRequest(id, source, 'GET');
   } catch (error) {
     console.error('Detail API error:', error);
-    
+
     return NextResponse.json(
       {
         success: false,
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
     return await handleDetailRequest(id, source, 'POST');
   } catch (error) {
     console.error('Detail API error:', error);
-    
+
     return NextResponse.json(
       {
         success: false,

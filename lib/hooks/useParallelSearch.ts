@@ -47,7 +47,7 @@ export function useParallelSearch(
   const [totalSources, setTotalSources] = useState(0);
   const [totalVideosFound, setTotalVideosFound] = useState(0);
   const currentQueryRef = useRef<string>('');
-  
+
   const abortControllerRef = useRef<AbortController | null>(null);
 
   /**
@@ -107,8 +107,8 @@ export function useParallelSearch(
 
             if (data.type === 'start') {
               setTotalSources(data.totalSources);
-              console.log(`[useParallelSearch] Started search for ${data.totalSources} sources`);
-            } 
+
+            }
             else if (data.type === 'videos') {
               const currentQuery = currentQueryRef.current;
               const newVideos: Video[] = data.videos.map((video: any) => ({
@@ -118,18 +118,18 @@ export function useParallelSearch(
                 relevanceScore: calculateRelevanceScore(video, currentQuery),
               }));
 
-              console.log(`[useParallelSearch] Received ${newVideos.length} videos from source ${data.source}`);
+
 
               // Optimized: Insert new videos in sorted position instead of re-sorting entire array
               setResults((prev) => {
                 if (prev.length === 0) return newVideos;
-                
+
                 // Binary insert for better performance with combined sorting
                 const combined = [...prev];
                 for (const video of newVideos) {
                   const relevanceScore = video.relevanceScore || 0;
                   const latency = video.latency || 99999; // Default high latency for sorting
-                  
+
                   // Find insert position using binary search
                   // Sort by: 1) relevance score (DESC), 2) latency (ASC)
                   let left = 0;
@@ -138,7 +138,7 @@ export function useParallelSearch(
                     const mid = Math.floor((left + right) / 2);
                     const midRelevance = combined[mid].relevanceScore || 0;
                     const midLatency = combined[mid].latency || 99999;
-                    
+
                     // Compare by relevance first
                     if (midRelevance > relevanceScore) {
                       left = mid + 1;
@@ -165,17 +165,16 @@ export function useParallelSearch(
                   name: newVideos[0]?.sourceName || data.source,
                 });
               }
-            } 
+            }
             else if (data.type === 'progress') {
               setCompletedSources(data.completedSources);
               setTotalVideosFound(data.totalVideosFound);
-            } 
+            }
             else if (data.type === 'complete') {
               setLoading(false);
-              
-              console.log(`[useParallelSearch] Search complete: ${data.totalVideosFound} videos found`);
-              console.log(`[useParallelSearch] Sources with videos: ${sourcesMap.size}`);
-              
+
+
+
               // Update available sources with correct property names
               const sources = Array.from(sourcesMap.entries()).map(([id, info]) => ({
                 id: id,  // Changed from sourceId to id
@@ -184,20 +183,20 @@ export function useParallelSearch(
               }));
               setAvailableSources(sources);
 
-              console.log('[useParallelSearch] Available sources:', sources);
+
 
               // Apply final sorting after all results are received
               setResults((currentResults) => {
                 const sorted = sortVideos(currentResults, sortBy);
-                
+
                 // Cache results
                 setTimeout(() => {
                   onCacheUpdate(searchQuery, sorted, sources);
                 }, 100);
-                
+
                 return sorted;
               });
-            } 
+            }
             else if (data.type === 'error') {
               console.error('Search error:', data.message);
               setLoading(false);
@@ -209,7 +208,7 @@ export function useParallelSearch(
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
-        console.log('Search aborted');
+
       } else {
         console.error('Search error:', error);
       }
@@ -237,7 +236,7 @@ export function useParallelSearch(
    * Load cached results
    */
   const loadCachedResults = useCallback((cachedResults: Video[], cachedSources: any[]) => {
-    console.log('[useParallelSearch] Loading cached results:', cachedResults.length, 'videos');
+
     setResults(cachedResults);
     setAvailableSources(cachedSources);
     setTotalVideosFound(cachedResults.length);

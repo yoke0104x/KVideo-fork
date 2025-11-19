@@ -44,11 +44,11 @@ export function useVideoPlayer(
     try {
       setVideoError('');
       setLoading(true);
-      
+
       const response = await fetch(`/api/detail?id=${videoId}&source=${source}`);
       const data = await response.json();
 
-      console.log('Video detail API response:', data);
+
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -60,22 +60,17 @@ export function useVideoPlayer(
       }
 
       if (data.success && data.data) {
-        console.log('Video data received:', {
-          id: data.data.vod_id,
-          name: data.data.vod_name,
-          episodeCount: data.data.episodes?.length || 0,
-          firstEpisodeUrl: data.data.episodes?.[0]?.url
-        });
+
 
         setVideoData(data.data);
         setLoading(false);
-        
+
         if (data.data.episodes && data.data.episodes.length > 0) {
           const episodeIndex = episodeParam ? parseInt(episodeParam, 10) : 0;
           const validIndex = (episodeIndex >= 0 && episodeIndex < data.data.episodes.length) ? episodeIndex : 0;
-          
+
           const episodeUrl = data.data.episodes[validIndex].url;
-          console.log('Setting play URL for episode', validIndex, ':', episodeUrl);
+
           setCurrentEpisode(validIndex);
           setPlayUrl(episodeUrl);
         } else {

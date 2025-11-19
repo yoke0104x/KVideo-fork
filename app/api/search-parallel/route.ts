@@ -10,7 +10,7 @@ import { getSourceById } from '@/lib/api/video-sources';
 
 export async function POST(request: NextRequest) {
   const encoder = new TextEncoder();
-  
+
   const stream = new ReadableStream({
     async start(controller) {
       try {
@@ -19,9 +19,9 @@ export async function POST(request: NextRequest) {
 
         // Validate input
         if (!query || typeof query !== 'string' || query.trim().length === 0) {
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
-            type: 'error', 
-            message: 'Invalid query' 
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+            type: 'error',
+            message: 'Invalid query'
           })}\n\n`));
           controller.close();
           return;
@@ -33,21 +33,21 @@ export async function POST(request: NextRequest) {
           .filter((source: any): source is NonNullable<typeof source> => source !== undefined);
 
         if (sources.length === 0) {
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
-            type: 'error', 
-            message: 'No valid sources' 
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+            type: 'error',
+            message: 'No valid sources'
           })}\n\n`));
           controller.close();
           return;
         }
 
         // Send initial status
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({
           type: 'start',
           totalSources: sources.length
         })}\n\n`));
 
-        console.log(`[Search Parallel] Starting search for "${query}" across ${sources.length} sources`);
+
 
         // Track progress
         let completedSources = 0;
@@ -57,22 +57,22 @@ export async function POST(request: NextRequest) {
         const searchPromises = sources.map(async (source: any) => {
           const startTime = performance.now(); // Track start time
           try {
-            console.log(`[Search Parallel] Searching source: ${source.id} (${getSourceDisplayName(source.id)})`);
-            
+
+
             // Search this source
             const result = await searchVideos(query.trim(), [source], page);
             const endTime = performance.now(); // Track end time
             const latency = Math.round(endTime - startTime); // Calculate latency in ms
             const videos = result[0]?.results || [];
-            
+
             completedSources++;
             totalVideosFound += videos.length;
 
-            console.log(`[Search Parallel] Source ${source.id} completed in ${latency}ms: ${videos.length} videos found`);
+
 
             // Stream videos immediately as they arrive WITH latency data
             if (videos.length > 0) {
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({
                 type: 'videos',
                 videos: videos.map((video: any) => ({
                   ...video,
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
             }
 
             // Send progress update
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
               type: 'progress',
               completedSources,
               totalSources: sources.length,
@@ -100,8 +100,8 @@ export async function POST(request: NextRequest) {
             // Log error but continue with other sources
             console.error(`[Search Parallel] Source ${source.id} failed after ${latency}ms:`, error);
             completedSources++;
-            
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
               type: 'progress',
               completedSources,
               totalSources: sources.length,
@@ -113,10 +113,10 @@ export async function POST(request: NextRequest) {
         // Wait for all sources to complete
         await Promise.all(searchPromises);
 
-        console.log(`[Search Parallel] Search complete: ${totalVideosFound} total videos found from ${completedSources}/${sources.length} sources`);
+
 
         // Send completion signal
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({
           type: 'complete',
           totalVideosFound,
           totalSources: sources.length
@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
 
       } catch (error) {
         console.error('Search error:', error);
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({
           type: 'error',
           message: error instanceof Error ? error.message : 'Unknown error'
         })}\n\n`));

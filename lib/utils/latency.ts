@@ -50,14 +50,4 @@ export function formatLatency(latency: number): string {
   return `${latency}ms`;
 }
 
-/**
- * Get latency emoji indicator
- * @param latency - Response time in milliseconds
- * @returns Emoji representing speed
- */
-export function getLatencyEmoji(latency: number): string {
-  if (latency < 500) return '⚡'; // Excellent
-  if (latency < 1000) return '✨'; // Good
-  if (latency < 2000) return '⏱️'; // Fair
-  return '🐌'; // Slow
-}
+
