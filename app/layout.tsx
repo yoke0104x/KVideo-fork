@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Analytics } from "@vercel/analytics/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,8 +32,9 @@ export default function RootLayout({
       >
         <ThemeProvider>
           {children}
+          <Analytics />
         </ThemeProvider>
-        
+
         {/* ARIA Live Region for Screen Reader Announcements */}
         <div
           id="aria-live-announcer"
@@ -41,7 +43,7 @@ export default function RootLayout({
           aria-atomic="true"
           className="sr-only"
         />
-        
+
         {/* Scroll Performance Optimization Script */}
         <script
           dangerouslySetInnerHTML={{
