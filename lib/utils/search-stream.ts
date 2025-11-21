@@ -1,6 +1,6 @@
 import { Video } from '@/lib/types';
 import { getSourceName } from '@/lib/utils/source-names';
-import { calculateRelevanceScore } from '@/lib/utils/search';
+import { calculateRelevanceScore, hasMinimumMatch } from '@/lib/utils/search';
 import { binaryInsertVideos } from '@/lib/utils/sorted-insert';
 
 interface StreamHandlerParams {
@@ -24,8 +24,27 @@ export async function processSearchStream({
 }: StreamHandlerParams) {
     const decoder = new TextDecoder();
     let buffer = '';
+    let lastProgressTime = Date.now();
+    let timeoutId: NodeJS.Timeout | null = null;
+    let isCompleted = false;
+
+    // Auto-complete if no progress for 3 seconds
+    const resetTimeout = () => {
+        if (timeoutId) clearTimeout(timeoutId);
+        lastProgressTime = Date.now();
+
+        timeoutId = setTimeout(() => {
+            if (!isCompleted) {
+                console.log('Search timeout: No progress for 3 seconds, auto-completing');
+                isCompleted = true;
+                onComplete();
+            }
+        }, 3000);
+    };
 
     try {
+        resetTimeout(); // Start initial timeout
+
         while (true) {
             const { done, value } = await reader.read();
             if (done) break;
@@ -42,17 +61,24 @@ export async function processSearchStream({
 
                     if (data.type === 'start') {
                         onStart(data.totalSources);
+                        resetTimeout();
                     } else if (data.type === 'videos') {
-                        const newVideos: Video[] = data.videos.map((video: any) => ({
-                            ...video,
-                            sourceName: video.sourceDisplayName || getSourceName(video.source),
-                            isNew: true,
-                            relevanceScore: calculateRelevanceScore(video, currentQuery),
-                        }));
+                        const newVideos: Video[] = data.videos
+                            .filter((video: any) => hasMinimumMatch(video.vod_name, currentQuery))
+                            .map((video: any) => ({
+                                ...video,
+                                sourceName: video.sourceDisplayName || getSourceName(video.source),
+                                isNew: true,
+                                relevanceScore: calculateRelevanceScore(video, currentQuery),
+                            }));
                         onVideos(newVideos, data.source);
+                        resetTimeout();
                     } else if (data.type === 'progress') {
                         onProgress(data.completedSources, data.totalVideosFound);
+                        resetTimeout();
                     } else if (data.type === 'complete') {
+                        if (timeoutId) clearTimeout(timeoutId);
+                        isCompleted = true;
                         onComplete();
                     } else if (data.type === 'error') {
                         onError(data.message);
@@ -63,6 +89,9 @@ export async function processSearchStream({
             }
         }
     } catch (error) {
+        if (timeoutId) clearTimeout(timeoutId);
         throw error;
+    } finally {
+        if (timeoutId) clearTimeout(timeoutId);
     }
 }

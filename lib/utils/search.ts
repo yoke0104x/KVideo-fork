@@ -6,6 +6,25 @@
 import type { VideoItem } from '@/lib/types';
 
 /**
+ * Check if title contains at least 2 consecutive characters from search query
+ * This filters out irrelevant results
+ */
+export function hasMinimumMatch(title: string, query: string): boolean {
+  const normalizedTitle = title.toLowerCase();
+  const normalizedQuery = query.toLowerCase().trim();
+
+  // Extract all 2+ character substrings from query
+  for (let i = 0; i <= normalizedQuery.length - 2; i++) {
+    const substring = normalizedQuery.slice(i, i + 2);
+    if (normalizedTitle.includes(substring)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
  * Calculate search relevance score
  * Higher score = more relevant to the search query
  */
@@ -16,7 +35,7 @@ export function calculateRelevanceScore(item: VideoItem, query: string): number 
 
   // Split query into words for partial matching
   const queryWords = normalizedQuery.split(/\s+/);
-  
+
   // 1. Exact title match (highest priority)
   if (normalizedTitle === normalizedQuery) {
     score += 1000;
@@ -31,14 +50,14 @@ export function calculateRelevanceScore(item: VideoItem, query: string): number 
   // 3. Title contains full query as substring
   if (normalizedTitle.includes(normalizedQuery)) {
     score += 200;
-    
+
     // Bonus for query appearing earlier in title
     const position = normalizedTitle.indexOf(normalizedQuery);
     score += Math.max(0, 50 - position * 2);
   }
 
   // 4. All query words present in title
-  const allWordsPresent = queryWords.every(word => 
+  const allWordsPresent = queryWords.every(word =>
     normalizedTitle.includes(word)
   );
   if (allWordsPresent && queryWords.length > 1) {
@@ -48,10 +67,10 @@ export function calculateRelevanceScore(item: VideoItem, query: string): number 
   // 5. Individual word matches
   queryWords.forEach(word => {
     if (word.length < 2) return; // Skip very short words
-    
+
     if (normalizedTitle.includes(word)) {
       score += 30;
-      
+
       // Bonus if word is at the start
       if (normalizedTitle.startsWith(word)) {
         score += 20;

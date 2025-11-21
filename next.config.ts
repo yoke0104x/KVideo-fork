@@ -94,6 +94,14 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '**.online',
       },
+      {
+        protocol: 'http',
+        hostname: '**.top',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.top',
+      },
     ],
     // Add image optimization for better performance
     formats: ['image/webp'],
