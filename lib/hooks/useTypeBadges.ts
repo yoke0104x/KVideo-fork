@@ -1,11 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-
-interface TypeBadge {
-  type: string;
-  count: number;
-}
+import type { TypeBadge } from '@/lib/types';
 
 /**
  * Custom hook to automatically collect and track type badges from video results
@@ -23,7 +19,7 @@ export function useTypeBadges<T extends { type_name?: string }>(videos: T[]) {
   // Collect and count type badges from videos
   const typeBadges = useMemo<TypeBadge[]>(() => {
     const typeMap = new Map<string, number>();
-    
+
     videos.forEach(video => {
       if (video.type_name && video.type_name.trim()) {
         const type = video.type_name.trim();
@@ -42,8 +38,8 @@ export function useTypeBadges<T extends { type_name?: string }>(videos: T[]) {
     if (selectedTypes.size === 0) {
       return videos;
     }
-    
-    return videos.filter(video => 
+
+    return videos.filter(video =>
       video.type_name && selectedTypes.has(video.type_name.trim())
     );
   }, [videos, selectedTypes]);
@@ -65,12 +61,12 @@ export function useTypeBadges<T extends { type_name?: string }>(videos: T[]) {
   // Auto-cleanup: remove selected types that no longer exist in badges
   useEffect(() => {
     const availableTypes = new Set(typeBadges.map(b => b.type));
-    
+
     setSelectedTypes(prev => {
       const filtered = new Set(
         Array.from(prev).filter(type => availableTypes.has(type))
       );
-      
+
       // Only update if changed
       if (filtered.size !== prev.size) {
         return filtered;

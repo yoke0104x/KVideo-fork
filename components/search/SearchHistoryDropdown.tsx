@@ -9,6 +9,9 @@
 import { useEffect, useRef } from 'react';
 import { Icons } from '@/components/ui/Icon';
 import type { SearchHistoryItem } from '@/lib/store/search-history-store';
+import { SearchHistoryEmptyState } from './SearchHistoryEmptyState';
+import { SearchHistoryHeader } from './SearchHistoryHeader';
+import { SearchHistoryListItem } from './SearchHistoryListItem';
 
 interface SearchHistoryDropdownProps {
   isOpen: boolean;
@@ -63,33 +66,11 @@ export function SearchHistoryDropdown({
       }}
     >
       {searchHistory.length === 0 ? (
-        // Empty state
-        <div className="search-history-empty">
-          <Icons.Clock size={32} className="text-[var(--text-color-secondary)] mx-auto mb-2 opacity-50" />
-          <span className="text-sm text-[var(--text-color-secondary)]">暂无搜索历史</span>
-        </div>
+        <SearchHistoryEmptyState />
       ) : (
         <>
           {/* Header with clear all button */}
-          <div className="search-history-header">
-            <div className="flex items-center gap-2">
-              <Icons.Clock size={16} className="text-[var(--text-color-secondary)]" />
-              <span className="text-sm font-medium text-[var(--text-color-secondary)]">
-                搜索历史
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onClearAll();
-              }}
-              className="text-xs text-[var(--accent-color)] hover:underline transition-all"
-              aria-label="清除所有历史"
-            >
-              清除全部
-            </button>
-          </div>
+          <SearchHistoryHeader onClearAll={onClearAll} />
 
           {/* Divider */}
           <div className="search-history-divider" />
@@ -97,51 +78,14 @@ export function SearchHistoryDropdown({
           {/* History items */}
           <div className="search-history-list">
             {searchHistory.map((item, index) => (
-              <div
+              <SearchHistoryListItem
                 key={`${item.query}-${item.timestamp}`}
-                data-index={index}
-                role="option"
-                aria-selected={index === highlightedIndex}
-                className={`search-history-item ${
-                  index === highlightedIndex ? 'highlighted' : ''
-                }`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  onSelectItem(item.query);
-                }}
-                onMouseEnter={() => {
-                  // Visual feedback on hover
-                }}
-                tabIndex={0}
-              >
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <Icons.Search
-                    size={16}
-                    className="flex-shrink-0 text-[var(--text-color-secondary)]"
-                  />
-                  <span className="text-[var(--text-color)] truncate flex-1">
-                    {item.query}
-                  </span>
-                  {item.resultCount !== undefined && (
-                    <span className="text-xs text-[var(--text-color-secondary)] flex-shrink-0">
-                      {item.resultCount} 个结果
-                    </span>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onRemoveItem(item.query);
-                  }}
-                  className="search-history-remove"
-                  aria-label={`删除 "${item.query}"`}
-                  tabIndex={0}
-                >
-                  <Icons.X size={14} />
-                </button>
-              </div>
+                item={item}
+                index={index}
+                isHighlighted={index === highlightedIndex}
+                onSelectItem={onSelectItem}
+                onRemoveItem={onRemoveItem}
+              />
             ))}
           </div>
         </>

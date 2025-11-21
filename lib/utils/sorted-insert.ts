@@ -2,10 +2,7 @@
  * Binary insert utility for sorted arrays
  */
 
-interface Video {
-    relevanceScore?: number;
-    latency?: number;
-}
+import type { Video } from '@/lib/types';
 
 /**
  * Insert videos into sorted array using binary search

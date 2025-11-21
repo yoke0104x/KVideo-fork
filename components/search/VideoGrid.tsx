@@ -3,18 +3,7 @@
 import { useState, useRef, useCallback, useMemo, memo } from 'react';
 import { VideoCard } from './VideoCard';
 
-interface Video {
-  vod_id: string;
-  vod_name: string;
-  vod_pic?: string;
-  vod_remarks?: string;
-  vod_year?: string;
-  type_name?: string;
-  source: string;
-  sourceName?: string;
-  isNew?: boolean;
-  latency?: number;
-}
+import { Video } from '@/lib/types';
 
 interface VideoGridProps {
   videos: Video[];
@@ -69,7 +58,7 @@ export const VideoGrid = memo(function VideoGrid({ videos, className = '' }: Vid
   const videoItems = useMemo(() => {
     return videos.map((video, index) => {
       const videoUrl = `/player?${new URLSearchParams({
-        id: video.vod_id,
+        id: String(video.vod_id),
         source: video.source,
         title: video.vod_name,
       }).toString()}`;

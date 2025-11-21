@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useDoubleTap, useScreenOrientation } from '@/lib/hooks/useMobilePlayer';
+import { useScreenOrientation } from '@/lib/hooks/useMobilePlayer';
 import { useMobilePlayerState } from './hooks/useMobilePlayerState';
 import { useMobilePlayerLogic } from './hooks/useMobilePlayerLogic';
-import { MobileControls } from './mobile/MobileControls';
+import { useMobileGestures } from './hooks/useMobileGestures';
+import { MobileControlsWrapper } from './mobile/MobileControlsWrapper';
 import { MobileOverlay } from './mobile/MobileOverlay';
 import { MobileSkipIndicator } from './mobile/MobileSkipIndicator';
 
@@ -27,30 +28,19 @@ export function MobileVideoPlayer({
   const {
     videoRef,
     containerRef,
-    progressBarRef,
     controlsTimeoutRef
   } = refs;
 
   const {
     isPlaying,
-    currentTime,
-    duration,
-    volume,
-    isMuted,
     isFullscreen,
     showControls,
     isLoading,
-    playbackRate,
-    showSpeedMenu,
-    showVolumeMenu,
-    showMoreMenu,
-    isPiPSupported,
+    showSkipIndicator,
     skipAmount,
     skipSide,
-    showSkipIndicator,
     toastMessage,
     showToast,
-    viewportWidth,
     setShowControls,
     setIsLoading
   } = state;
@@ -72,55 +62,23 @@ export function MobileVideoPlayer({
     handleTimeUpdateEvent,
     handleLoadedMetadata,
     handleVideoError,
-    handleProgressTouchStart,
-    handleProgressTouchMove,
-    handleProgressTouchEnd,
-    handleProgressClick,
-    toggleMute,
-    toggleFullscreen,
-    togglePictureInPicture,
-    changePlaybackSpeed,
-    handleCopyLink,
-    formatTime
   } = logic;
 
   // Screen orientation management
   useScreenOrientation(isFullscreen);
 
   // Double tap handler
-  const { handleTap } = useDoubleTap({
-    onDoubleTapLeft: () => skipVideo(10, 'left'),
-    onDoubleTapRight: () => skipVideo(10, 'right'),
-    onSkipContinueLeft: () => skipVideo(10, 'left'),
-    onSkipContinueRight: () => skipVideo(10, 'right'),
-    isSkipModeActive: showSkipIndicator,
-    onSingleTap: () => {
-      if (!showControls) {
-        setShowControls(true);
-        if (controlsTimeoutRef.current) {
-          clearTimeout(controlsTimeoutRef.current);
-        }
-        if (isPlaying) {
-          controlsTimeoutRef.current = setTimeout(() => {
-            setShowControls(false);
-          }, 3000);
-        }
-      } else {
-        togglePlay();
-        if (controlsTimeoutRef.current) {
-          clearTimeout(controlsTimeoutRef.current);
-        }
-        if (isPlaying) {
-          controlsTimeoutRef.current = setTimeout(() => {
-            setShowControls(false);
-          }, 3000);
-        }
-      }
-    },
+  const { handleTap } = useMobileGestures({
+    skipVideo,
+    showSkipIndicator,
+    showControls,
+    setShowControls,
+    controlsTimeoutRef,
+    isPlaying,
+    togglePlay,
   });
 
-  const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
-  const isCompactLayout = viewportWidth < 640;
+
 
   return (
     <div
@@ -158,42 +116,10 @@ export function MobileVideoPlayer({
         skipAmount={skipAmount}
       />
 
-      <MobileControls
-        showControls={showControls}
-        isCompactLayout={isCompactLayout}
-        isPlaying={isPlaying}
-        currentTime={currentTime}
-        duration={duration}
-        volume={volume}
-        isMuted={isMuted}
-        isFullscreen={isFullscreen}
-        playbackRate={playbackRate}
-        showMoreMenu={showMoreMenu}
-        showVolumeMenu={showVolumeMenu}
-        showSpeedMenu={showSpeedMenu}
-        isPiPSupported={isPiPSupported}
-        progressBarRef={progressBarRef}
-        onTogglePlay={togglePlay}
-        onSkipVideo={skipVideo}
-        onToggleMute={toggleMute}
-        onToggleFullscreen={toggleFullscreen}
-        onToggleMoreMenu={() => state.setShowMoreMenu(!showMoreMenu)}
-        onToggleVolumeMenu={() => state.setShowVolumeMenu(!showVolumeMenu)}
-        onToggleSpeedMenu={() => state.setShowSpeedMenu(!showSpeedMenu)}
-        onTogglePiP={togglePictureInPicture}
-        onVolumeChange={(v) => {
-          state.setVolume(v);
-          if (videoRef.current) videoRef.current.volume = v;
-          state.setIsMuted(v === 0);
-        }}
-        onSpeedChange={changePlaybackSpeed}
-        onCopyLink={handleCopyLink}
-        onProgressClick={handleProgressClick}
-        onProgressTouchStart={handleProgressTouchStart}
-        onProgressTouchMove={handleProgressTouchMove}
-        onProgressTouchEnd={handleProgressTouchEnd}
-        formatTime={formatTime}
-        speeds={speeds}
+      <MobileControlsWrapper
+        state={state}
+        logic={logic}
+        refs={refs}
       />
     </div>
   );

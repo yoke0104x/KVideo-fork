@@ -1,8 +1,8 @@
 import { useCallback, useEffect } from 'react';
 
 interface UseFullscreenControlsProps {
-    containerRef: React.RefObject<HTMLDivElement>;
-    videoRef: React.RefObject<HTMLVideoElement>;
+    containerRef: React.RefObject<HTMLDivElement | null>;
+    videoRef: React.RefObject<HTMLVideoElement | null>;
     isFullscreen: boolean;
     setIsFullscreen: (fullscreen: boolean) => void;
     isPiPSupported: boolean;

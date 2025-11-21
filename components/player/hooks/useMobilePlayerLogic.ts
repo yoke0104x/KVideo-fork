@@ -4,6 +4,14 @@ import { useMobileSkipControls } from './mobile/useMobileSkipControls';
 import { useMobileFullscreenControls } from './mobile/useMobileFullscreenControls';
 import { useMobileMenuControls } from './mobile/useMobileMenuControls';
 import { useMobileUtilities } from './mobile/useMobileUtilities';
+import {
+    buildPlaybackParams,
+    buildProgressParams,
+    buildSkipParams,
+    buildFullscreenParams,
+    buildUtilitiesParams,
+    buildMenuParams,
+} from './mobile/mobile-player-params';
 
 interface UseMobilePlayerLogicProps {
     src: string;
@@ -58,81 +66,35 @@ export function useMobilePlayerLogic({
         setViewportWidth
     } = state;
 
-    const playbackControls = useMobilePlaybackControls({
-        videoRef,
-        isPlaying,
-        setIsPlaying,
-        setIsLoading,
-        initialTime,
-        setDuration,
-        setCurrentTime,
-        setPlaybackRate,
-        setShowMoreMenu,
-        setShowVolumeMenu,
-        setShowSpeedMenu,
-        onTimeUpdate,
-        onError,
-        isDraggingProgressRef,
-        isTogglingRef
-    });
+    const playbackControls = useMobilePlaybackControls(buildPlaybackParams({
+        videoRef, isPlaying, setIsPlaying, setIsLoading, initialTime, setDuration,
+        setCurrentTime, setPlaybackRate, setShowMoreMenu, setShowVolumeMenu,
+        setShowSpeedMenu, onTimeUpdate, onError, isDraggingProgressRef, isTogglingRef
+    }));
 
-    const progressControls = useMobileProgressControls({
-        videoRef,
-        progressBarRef,
-        duration,
-        setCurrentTime,
-        isDraggingProgressRef
-    });
+    const progressControls = useMobileProgressControls(buildProgressParams({
+        videoRef, progressBarRef, duration, setCurrentTime, isDraggingProgressRef
+    }));
 
-    const skipControls = useMobileSkipControls({
-        videoRef,
-        duration,
-        setCurrentTime,
-        skipAmount,
-        skipSide,
-        setSkipAmount,
-        setSkipSide,
-        setShowSkipIndicator,
-        skipTimeoutRef
-    });
+    const skipControls = useMobileSkipControls(buildSkipParams({
+        videoRef, duration, setCurrentTime, skipAmount, skipSide, setSkipAmount,
+        setSkipSide, setShowSkipIndicator, skipTimeoutRef
+    }));
 
-    const fullscreenControls = useMobileFullscreenControls({
-        containerRef,
-        videoRef,
-        isFullscreen,
-        setIsFullscreen,
-        isPiPSupported,
-        setIsPiPSupported
-    });
+    const fullscreenControls = useMobileFullscreenControls(buildFullscreenParams({
+        containerRef, videoRef, isFullscreen, setIsFullscreen, isPiPSupported, setIsPiPSupported
+    }));
 
-    const utilities = useMobileUtilities({
-        src,
-        volume,
-        isMuted,
-        videoRef,
-        setVolume,
-        setIsMuted,
-        setViewportWidth,
-        setToastMessage,
-        setShowToast,
-        toastTimeoutRef
-    });
+    const utilities = useMobileUtilities(buildUtilitiesParams({
+        src, volume, isMuted, videoRef, setVolume, setIsMuted, setViewportWidth,
+        setToastMessage, setShowToast, toastTimeoutRef
+    }));
 
-    useMobileMenuControls({
-        videoRef,
-        isPlaying,
-        showMoreMenu,
-        showVolumeMenu,
-        showSpeedMenu,
-        wasPlayingBeforeMenu,
-        setShowControls,
-        setShowMoreMenu,
-        setShowVolumeMenu,
-        setShowSpeedMenu,
-        setWasPlayingBeforeMenu,
-        controlsTimeoutRef,
-        menuIdleTimeoutRef
-    });
+    useMobileMenuControls(buildMenuParams({
+        videoRef, isPlaying, showMoreMenu, showVolumeMenu, showSpeedMenu,
+        wasPlayingBeforeMenu, setShowControls, setShowMoreMenu, setShowVolumeMenu,
+        setShowSpeedMenu, setWasPlayingBeforeMenu, controlsTimeoutRef, menuIdleTimeoutRef
+    }));
 
     return {
         skipVideo: skipControls.skipVideo,

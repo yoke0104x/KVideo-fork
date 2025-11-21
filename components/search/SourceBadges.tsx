@@ -11,25 +11,20 @@ import { memo } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Icons } from '@/components/ui/Icon';
 import { SourceBadgeList } from './SourceBadgeList';
-
-interface Source {
-  id: string;
-  name: string;
-  count: number;
-}
+import type { SourceBadge } from '@/lib/types';
 
 interface SourceBadgesProps {
-  sources: Source[];
+  sources: SourceBadge[];
   selectedSources: Set<string>;
   onToggleSource: (sourceId: string) => void;
   className?: string;
 }
 
-export const SourceBadges = memo(function SourceBadges({ 
-  sources, 
+export const SourceBadges = memo(function SourceBadges({
+  sources,
   selectedSources,
   onToggleSource,
-  className = '' 
+  className = ''
 }: SourceBadgesProps) {
   if (sources.length === 0) {
     return null;
@@ -40,8 +35,8 @@ export const SourceBadges = memo(function SourceBadges({
   };
 
   return (
-    <Card 
-      hover={false} 
+    <Card
+      hover={false}
       className={`p-4 animate-fade-in bg-[var(--bg-color)]/50 backdrop-blur-none saturate-100 shadow-sm border-[var(--glass-border)] ${className}`}
     >
       <div className="flex items-start gap-3">
@@ -51,14 +46,14 @@ export const SourceBadges = memo(function SourceBadges({
             视频源 ({sources.length}):
           </span>
         </div>
-        
+
         <SourceBadgeList
           sources={sources}
           selectedSources={selectedSources}
           onToggleSource={onToggleSource}
         />
       </div>
-      
+
       {selectedSources.size > 0 && (
         <div className="mt-3 pt-3 border-t border-[var(--glass-border)]">
           <button

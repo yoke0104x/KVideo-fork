@@ -8,10 +8,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useHistoryStore } from '@/lib/store/history-store';
 import { Icons } from '@/components/ui/Icon';
-import { Button } from '@/components/ui/Button';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { HistoryItem } from './HistoryItem';
-import { HistoryEmptyState } from './HistoryEmptyState';
+import { HistoryHeader } from './HistoryHeader';
+import { HistoryList } from './HistoryList';
+import { HistoryFooter } from './HistoryFooter';
 import { trapFocus } from '@/lib/accessibility/focus-management';
 
 export function WatchHistorySidebar() {
@@ -110,67 +110,17 @@ export function WatchHistorySidebar() {
         }}
         className={`fixed top-0 right-0 bottom-0 w-[85%] sm:w-[90%] max-w-[420px] z-[2000] bg-[var(--glass-bg)] backdrop-blur-[8px] saturate-[120%] border-l border-[var(--glass-border)] rounded-tl-[var(--radius-2xl)] rounded-bl-[var(--radius-2xl)] p-6 flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.2)] transition-transform duration-250 ease-out`}
       >
-        {/* Header */}
-        <header className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--glass-border)]">
-          <div className="flex items-center gap-3">
-            <Icons.History size={24} className="text-[var(--accent-color)]" />
-            <h2
-              id="history-sidebar-title"
-              className="text-xl font-semibold text-[var(--text-color)]"
-            >
-              观看历史
-            </h2>
-          </div>
-          <button
-            onClick={() => setIsOpen(false)}
-            className="p-2 hover:bg-[var(--glass-bg)] rounded-full transition-colors"
-            aria-label="关闭"
-          >
-            <Icons.X size={24} className="text-[var(--text-color-secondary)]" />
-          </button>
-        </header>
+        <HistoryHeader onClose={() => setIsOpen(false)} />
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto -mx-2 px-2" style={{
-          transform: 'translate3d(0, 0, 0)',
-          WebkitOverflowScrolling: 'touch'
-        }}>
-          {viewingHistory.length === 0 ? (
-            <HistoryEmptyState />
-          ) : (
-            <div className="space-y-3">
-              {viewingHistory.map((item) => (
-                <HistoryItem
-                  key={`${item.videoId}-${item.source}-${item.timestamp}`}
-                  videoId={item.videoId}
-                  source={item.source}
-                  title={item.title}
-                  poster={item.poster}
-                  episodeIndex={item.episodeIndex}
-                  episodes={item.episodes}
-                  playbackPosition={item.playbackPosition}
-                  duration={item.duration}
-                  timestamp={item.timestamp}
-                  onRemove={() => handleDeleteItem(item.videoId, item.source)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        <HistoryList
+          history={viewingHistory}
+          onRemove={handleDeleteItem}
+        />
 
-        {/* Footer */}
-        {viewingHistory.length > 0 && (
-          <footer className="mt-4 pt-4 border-t border-[var(--glass-border)]">
-            <Button
-              variant="secondary"
-              onClick={handleClearAll}
-              className="w-full flex items-center justify-center gap-2"
-            >
-              <Icons.Trash size={18} />
-              清空历史
-            </Button>
-          </footer>
-        )}
+        <HistoryFooter
+          hasHistory={viewingHistory.length > 0}
+          onClearAll={handleClearAll}
+        />
       </aside>
 
       {/* Confirm Dialog */}

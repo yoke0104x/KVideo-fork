@@ -8,18 +8,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Icons } from '@/components/ui/Icon';
 import { LatencyBadge } from '@/components/ui/LatencyBadge';
 
-interface Video {
-    vod_id: string;
-    vod_name: string;
-    vod_pic?: string;
-    vod_remarks?: string;
-    vod_year?: string;
-    type_name?: string;
-    source: string;
-    sourceName?: string;
-    isNew?: boolean;
-    latency?: number;
-}
+import { Video } from '@/lib/types';
 
 interface VideoCardProps {
     video: Video;

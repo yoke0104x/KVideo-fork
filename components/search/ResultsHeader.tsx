@@ -2,11 +2,12 @@
 
 import { Badge } from '@/components/ui/Badge';
 import { Icons } from '@/components/ui/Icon';
+import type { SourceBadge } from '@/lib/types';
 
 interface ResultsHeaderProps {
   loading: boolean;
   resultsCount: number;
-  availableSources: Array<{ id: string; name: string; count: number }>;
+  availableSources: SourceBadge[];
 }
 
 export function ResultsHeader({

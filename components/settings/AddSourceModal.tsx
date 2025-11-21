@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useAddSourceForm } from './hooks/useAddSourceForm';
+import { ModalBackdrop } from '@/components/ui/ModalBackdrop';
+import { ModalHeader } from '@/components/ui/ModalHeader';
 import type { VideoSource } from '@/lib/types';
 
 interface AddSourceModalProps {
@@ -11,89 +13,28 @@ interface AddSourceModalProps {
 }
 
 export function AddSourceModal({ isOpen, onClose, onAdd, existingIds }: AddSourceModalProps) {
-  const [name, setName] = useState('');
-  const [url, setUrl] = useState('');
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (isOpen) {
-      setName('');
-      setUrl('');
-      setError('');
-    }
-  }, [isOpen]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (!name.trim() || !url.trim()) {
-      setError('请填写所有字段');
-      return;
-    }
-
-    try {
-      new URL(url);
-    } catch {
-      setError('请输入有效的 URL');
-      return;
-    }
-
-    const id = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
-    if (existingIds.includes(id)) {
-      setError('此源名称已存在');
-      return;
-    }
-
-    const newSource: VideoSource = {
-      id,
-      name: name.trim(),
-      baseUrl: url.trim(),
-      searchPath: '',
-      detailPath: '',
-      enabled: true,
-      priority: existingIds.length + 1,
-    };
-
-    onAdd(newSource);
-    onClose();
-  };
+  const { name, setName, url, setUrl, error, handleSubmit } = useAddSourceForm({
+    isOpen,
+    existingIds,
+    onAdd,
+    onClose,
+  });
 
   if (!isOpen) return null;
 
   return (
     <>
-      {/* Backdrop */}
-      <div
-        className={`fixed inset-0 z-[9998] bg-black/30 backdrop-blur-md transition-opacity duration-300 ${
-          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
-        onClick={onClose}
-      />
+      <ModalBackdrop isOpen={isOpen} onClose={onClose} />
 
       {/* Modal */}
       <div
-        className={`fixed top-1/2 left-1/2 z-[9999] w-[90%] max-w-md -translate-x-1/2 transition-all duration-300 ${
-          isOpen 
-            ? 'opacity-100 -translate-y-1/2 scale-100' 
-            : 'opacity-0 -translate-y-[40%] scale-95 pointer-events-none'
-        }`}
+        className={`fixed top-1/2 left-1/2 z-[9999] w-[90%] max-w-md -translate-x-1/2 transition-all duration-300 ${isOpen
+          ? 'opacity-100 -translate-y-1/2 scale-100'
+          : 'opacity-0 -translate-y-[40%] scale-95 pointer-events-none'
+          }`}
       >
         <div className="bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--glass-border)] rounded-[var(--radius-2xl)] shadow-[var(--shadow-md)] p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-semibold text-[var(--text-color)]">
-              添加自定义源
-            </h3>
-            <button
-              onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-[var(--radius-full)] bg-[var(--glass-bg)] border border-[var(--glass-border)] text-[var(--text-color)] hover:bg-[color-mix(in_srgb,var(--accent-color)_10%,transparent)] transition-all duration-200"
-              aria-label="关闭"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 6L6 18M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
+          <ModalHeader title="添加自定义源" onClose={onClose} />
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

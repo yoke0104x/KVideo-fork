@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
 interface UsePlaybackControlsProps {
-    videoRef: React.RefObject<HTMLVideoElement>;
+    videoRef: React.RefObject<HTMLVideoElement | null>;
     isPlaying: boolean;
     setIsPlaying: (playing: boolean) => void;
     setIsLoading: (loading: boolean) => void;
@@ -11,6 +11,9 @@ interface UsePlaybackControlsProps {
     onTimeUpdate?: (currentTime: number, duration: number) => void;
     onError?: (error: string) => void;
     isDraggingProgressRef: React.MutableRefObject<boolean>;
+    speedMenuTimeoutRef: React.MutableRefObject<NodeJS.Timeout | null>;
+    setPlaybackRate: (rate: number) => void;
+    setShowSpeedMenu: (show: boolean) => void;
 }
 
 export function usePlaybackControls({
@@ -23,7 +26,10 @@ export function usePlaybackControls({
     setCurrentTime,
     onTimeUpdate,
     onError,
-    isDraggingProgressRef
+    isDraggingProgressRef,
+    speedMenuTimeoutRef,
+    setPlaybackRate,
+    setShowSpeedMenu
 }: UsePlaybackControlsProps) {
     const togglePlay = useCallback(() => {
         if (!videoRef.current) return;
@@ -67,7 +73,7 @@ export function usePlaybackControls({
         }
     }, [setIsLoading, onError]);
 
-    const changePlaybackSpeed = useCallback((speed: number, speedMenuTimeoutRef: React.MutableRefObject<NodeJS.Timeout | null>, setPlaybackRate: (rate: number) => void, setShowSpeedMenu: (show: boolean) => void) => {
+    const changePlaybackSpeed = useCallback((speed: number) => {
         if (!videoRef.current) return;
         videoRef.current.playbackRate = speed;
         setPlaybackRate(speed);
@@ -75,7 +81,7 @@ export function usePlaybackControls({
         if (speedMenuTimeoutRef.current) {
             clearTimeout(speedMenuTimeoutRef.current);
         }
-    }, [videoRef]);
+    }, [videoRef, setPlaybackRate, setShowSpeedMenu, speedMenuTimeoutRef]);
 
     const formatTime = useCallback((seconds: number) => {
         if (isNaN(seconds)) return '0:00:00';

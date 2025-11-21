@@ -1,33 +1,16 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
-import { getSourceName, SOURCE_IDS } from '@/lib/utils/source-names';
-import { calculateRelevanceScore } from '@/lib/utils/search';
+import { useCallback } from 'react';
 import { sortVideos } from '@/lib/utils/sort';
-import { binaryInsertVideos } from '@/lib/utils/sorted-insert';
 import type { SortOption } from '@/lib/store/settings-store';
-
-interface Video {
-  vod_id: string;
-  vod_name: string;
-  vod_pic?: string;
-  vod_remarks?: string;
-  vod_year?: string;
-  type_name?: string;
-  source: string;
-  sourceName?: string;
-  isNew?: boolean;
-  vod_play_url?: string;
-  vod_actor?: string;
-  vod_director?: string;
-  relevanceScore?: number;
-  latency?: number; // Response time in milliseconds
-}
+import type { Video, SourceBadge } from '@/lib/types';
+import { useSearchState } from './useSearchState';
+import { useSearchAction } from './useSearchAction';
 
 export interface ParallelSearchResult {
   loading: boolean;
   results: Video[];
-  availableSources: any[];
+  availableSources: SourceBadge[];
   completedSources: number;
   totalSources: number;
   totalVideosFound: number;
@@ -41,178 +24,49 @@ export function useParallelSearch(
   onCacheUpdate: (query: string, results: any[], sources: any[]) => void,
   onUrlUpdate: (query: string) => void
 ): ParallelSearchResult {
-  const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<Video[]>([]);
-  const [availableSources, setAvailableSources] = useState<any[]>([]);
-  const [completedSources, setCompletedSources] = useState(0);
-  const [totalSources, setTotalSources] = useState(0);
-  const [totalVideosFound, setTotalVideosFound] = useState(0);
-  const currentQueryRef = useRef<string>('');
+  const state = useSearchState();
+  const {
+    loading,
+    results,
+    availableSources,
+    completedSources,
+    totalSources,
+    totalVideosFound,
+    setResults,
+    setAvailableSources,
+    setTotalVideosFound,
+    resetState,
+  } = state;
 
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  /**
-   * Perform parallel search with streaming results
-   */
-  const performSearch = useCallback(async (searchQuery: string, sortBy: SortOption = 'default') => {
-    if (!searchQuery.trim()) return;
-
-    // Abort any ongoing search
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    abortControllerRef.current = new AbortController();
-
-    // Reset state
-    setLoading(true);
-    setResults([]);
-    setAvailableSources([]);
-    setCompletedSources(0);
-    setTotalSources(0);
-    setTotalVideosFound(0);
-    currentQueryRef.current = searchQuery.trim();
-
-    // Update URL
-    onUrlUpdate(searchQuery);
-
-    try {
-      const response = await fetch('/api/search-parallel', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: searchQuery, sources: SOURCE_IDS }),
-        signal: abortControllerRef.current.signal,
-      });
-
-      if (!response.ok) throw new Error('Search failed');
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      if (!reader) throw new Error('No response stream');
-
-      let buffer = '';
-      const sourcesMap = new Map<string, { count: number; name: string }>();
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-
-          try {
-            const data = JSON.parse(line.slice(6));
-
-            if (data.type === 'start') {
-              setTotalSources(data.totalSources);
-
-            }
-            else if (data.type === 'videos') {
-              const currentQuery = currentQueryRef.current;
-              const newVideos: Video[] = data.videos.map((video: any) => ({
-                ...video,
-                sourceName: video.sourceDisplayName || getSourceName(video.source),
-                isNew: true,
-                relevanceScore: calculateRelevanceScore(video, currentQuery),
-              }));
-
-
-              // Optimized: Insert new videos in sorted position
-              setResults((prev) => binaryInsertVideos(prev, newVideos));
-
-              // Update source stats
-              if (!sourcesMap.has(data.source)) {
-                sourcesMap.set(data.source, {
-                  count: newVideos.length,
-                  name: newVideos[0]?.sourceName || data.source,
-                });
-              }
-            }
-            else if (data.type === 'progress') {
-              setCompletedSources(data.completedSources);
-              setTotalVideosFound(data.totalVideosFound);
-            }
-            else if (data.type === 'complete') {
-              setLoading(false);
-
-
-
-              // Update available sources with correct property names
-              const sources = Array.from(sourcesMap.entries()).map(([id, info]) => ({
-                id: id,  // Changed from sourceId to id
-                name: info.name,  // Changed from sourceName to name
-                count: info.count,
-              }));
-              setAvailableSources(sources);
-
-
-
-              // Apply final sorting after all results are received
-              setResults((currentResults) => {
-                const sorted = sortVideos(currentResults, sortBy);
-
-                // Cache results
-                setTimeout(() => {
-                  onCacheUpdate(searchQuery, sorted, sources);
-                }, 100);
-
-                return sorted;
-              });
-            }
-            else if (data.type === 'error') {
-              console.error('Search error:', data.message);
-              setLoading(false);
-            }
-          } catch (error) {
-            console.error('Error parsing stream data:', error);
-          }
-        }
-      }
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-
-      } else {
-        console.error('Search error:', error);
-      }
-      setLoading(false);
-    }
-  }, [loading, onUrlUpdate, onCacheUpdate]);
+  const { performSearch, cancelSearch } = useSearchAction({
+    state,
+    onCacheUpdate,
+    onUrlUpdate,
+  });
 
   /**
    * Reset search state
    */
   const resetSearch = useCallback(() => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    setLoading(false);
-    setResults([]);
-    setAvailableSources([]);
-    setCompletedSources(0);
-    setTotalSources(0);
-    setTotalVideosFound(0);
-    currentQueryRef.current = '';
-  }, []);
+    cancelSearch();
+    resetState();
+  }, [cancelSearch, resetState]);
 
   /**
    * Load cached results
    */
   const loadCachedResults = useCallback((cachedResults: Video[], cachedSources: any[]) => {
-
     setResults(cachedResults);
     setAvailableSources(cachedSources);
     setTotalVideosFound(cachedResults.length);
-  }, []);
+  }, [setResults, setAvailableSources, setTotalVideosFound]);
 
   /**
    * Apply sorting to current results
    */
   const applySorting = useCallback((sortBy: SortOption) => {
     setResults((currentResults) => sortVideos(currentResults, sortBy));
-  }, []);
+  }, [setResults]);
 
   return {
     loading,
@@ -227,3 +81,4 @@ export function useParallelSearch(
     applySorting,
   };
 }
+

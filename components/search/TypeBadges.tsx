@@ -11,11 +11,7 @@ import { memo } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Icons } from '@/components/ui/Icon';
 import { TypeBadgeList } from './TypeBadgeList';
-
-interface TypeBadge {
-  type: string;
-  count: number;
-}
+import type { TypeBadge } from '@/lib/types';
 
 interface TypeBadgesProps {
   badges: TypeBadge[];
@@ -24,11 +20,11 @@ interface TypeBadgesProps {
   className?: string;
 }
 
-export const TypeBadges = memo(function TypeBadges({ 
-  badges, 
+export const TypeBadges = memo(function TypeBadges({
+  badges,
   selectedTypes,
   onToggleType,
-  className = '' 
+  className = ''
 }: TypeBadgesProps) {
   if (badges.length === 0) {
     return null;
@@ -39,8 +35,8 @@ export const TypeBadges = memo(function TypeBadges({
   };
 
   return (
-    <Card 
-      hover={false} 
+    <Card
+      hover={false}
       className={`p-4 animate-fade-in bg-[var(--bg-color)]/50 backdrop-blur-none saturate-100 shadow-sm border-[var(--glass-border)] ${className}`}
     >
       <div className="flex items-start gap-3">
@@ -50,14 +46,14 @@ export const TypeBadges = memo(function TypeBadges({
             分类标签 ({badges.length}):
           </span>
         </div>
-        
+
         <TypeBadgeList
           badges={badges}
           selectedTypes={selectedTypes}
           onToggleType={onToggleType}
         />
       </div>
-      
+
       {selectedTypes.size > 0 && (
         <div className="mt-3 pt-3 border-t border-[var(--glass-border)]">
           <button

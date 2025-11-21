@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
 interface UseSkipControlsProps {
-    videoRef: React.RefObject<HTMLVideoElement>;
+    videoRef: React.RefObject<HTMLVideoElement | null>;
     duration: number;
     setCurrentTime: (time: number) => void;
     showSkipForwardIndicator: boolean;

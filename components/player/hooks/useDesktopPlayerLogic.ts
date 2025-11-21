@@ -3,17 +3,20 @@ import { useVolumeControls } from './desktop/useVolumeControls';
 import { useProgressControls } from './desktop/useProgressControls';
 import { useSkipControls } from './desktop/useSkipControls';
 import { useFullscreenControls } from './desktop/useFullscreenControls';
-import { useKeyboardShortcuts } from './desktop/useKeyboardShortcuts';
 import { useControlsVisibility } from './desktop/useControlsVisibility';
 import { useUtilities } from './desktop/useUtilities';
+import { useDesktopShortcuts } from './desktop/useDesktopShortcuts';
+import { useDesktopPlayerState } from './useDesktopPlayerState';
+
+type DesktopPlayerState = ReturnType<typeof useDesktopPlayerState>;
 
 interface UseDesktopPlayerLogicProps {
     src: string;
     initialTime: number;
     onError?: (error: string) => void;
     onTimeUpdate?: (currentTime: number, duration: number) => void;
-    refs: any;
-    state: any;
+    refs: DesktopPlayerState['refs'];
+    state: DesktopPlayerState['state'];
 }
 
 export function useDesktopPlayerLogic({
@@ -25,19 +28,10 @@ export function useDesktopPlayerLogic({
     state
 }: UseDesktopPlayerLogicProps) {
     const {
-        videoRef,
-        containerRef,
-        progressBarRef,
-        volumeBarRef,
-        controlsTimeoutRef,
-        speedMenuTimeoutRef,
-        skipForwardTimeoutRef,
-        skipBackwardTimeoutRef,
-        volumeBarTimeoutRef,
-        isDraggingProgressRef,
-        isDraggingVolumeRef,
-        mouseMoveThrottleRef,
-        toastTimeoutRef
+        videoRef, containerRef, progressBarRef, volumeBarRef,
+        controlsTimeoutRef, speedMenuTimeoutRef, skipForwardTimeoutRef,
+        skipBackwardTimeoutRef, volumeBarTimeoutRef, isDraggingProgressRef,
+        isDraggingVolumeRef, mouseMoveThrottleRef, toastTimeoutRef
     } = refs;
 
     const {
@@ -57,102 +51,54 @@ export function useDesktopPlayerLogic({
         skipBackwardAmount, setSkipBackwardAmount,
         showSkipForwardIndicator, setShowSkipForwardIndicator,
         showSkipBackwardIndicator, setShowSkipBackwardIndicator,
-        setIsSkipForwardAnimatingOut,
-        setIsSkipBackwardAnimatingOut,
-        setShowVolumeBar,
-        setToastMessage,
-        setShowToast
+        setIsSkipForwardAnimatingOut, setIsSkipBackwardAnimatingOut,
+        setShowVolumeBar, setToastMessage, setShowToast
     } = state;
 
     const playbackControls = usePlaybackControls({
-        videoRef,
-        isPlaying,
-        setIsPlaying,
-        setIsLoading,
-        initialTime,
-        setDuration,
-        setCurrentTime,
-        onTimeUpdate,
-        onError,
-        isDraggingProgressRef
+        videoRef, isPlaying, setIsPlaying, setIsLoading,
+        initialTime, setDuration, setCurrentTime, onTimeUpdate, onError,
+        isDraggingProgressRef, speedMenuTimeoutRef, setPlaybackRate, setShowSpeedMenu
     });
 
     const volumeControls = useVolumeControls({
-        videoRef,
-        volumeBarRef,
-        volume,
-        isMuted,
-        setVolume,
-        setIsMuted,
-        setShowVolumeBar,
-        volumeBarTimeoutRef,
-        isDraggingVolumeRef
+        videoRef, volumeBarRef, volume, isMuted,
+        setVolume, setIsMuted, setShowVolumeBar,
+        volumeBarTimeoutRef, isDraggingVolumeRef
     });
 
     const progressControls = useProgressControls({
-        videoRef,
-        progressBarRef,
-        duration,
-        setCurrentTime,
-        isDraggingProgressRef
+        videoRef, progressBarRef, duration,
+        setCurrentTime, isDraggingProgressRef
     });
 
     const skipControls = useSkipControls({
-        videoRef,
-        duration,
-        setCurrentTime,
-        showSkipForwardIndicator,
-        showSkipBackwardIndicator,
-        skipForwardAmount,
-        skipBackwardAmount,
-        setShowSkipForwardIndicator,
-        setShowSkipBackwardIndicator,
-        setSkipForwardAmount,
-        setSkipBackwardAmount,
-        setIsSkipForwardAnimatingOut,
-        setIsSkipBackwardAnimatingOut,
-        skipForwardTimeoutRef,
-        skipBackwardTimeoutRef
+        videoRef, duration, setCurrentTime,
+        showSkipForwardIndicator, showSkipBackwardIndicator,
+        skipForwardAmount, skipBackwardAmount,
+        setShowSkipForwardIndicator, setShowSkipBackwardIndicator,
+        setSkipForwardAmount, setSkipBackwardAmount,
+        setIsSkipForwardAnimatingOut, setIsSkipBackwardAnimatingOut,
+        skipForwardTimeoutRef, skipBackwardTimeoutRef
     });
 
     const fullscreenControls = useFullscreenControls({
-        containerRef,
-        videoRef,
-        isFullscreen,
-        setIsFullscreen,
-        isPiPSupported,
-        isAirPlaySupported,
-        setIsPiPSupported,
-        setIsAirPlaySupported
+        containerRef, videoRef, isFullscreen, setIsFullscreen,
+        isPiPSupported, isAirPlaySupported, setIsPiPSupported, setIsAirPlaySupported
     });
 
     const controlsVisibility = useControlsVisibility({
-        isPlaying,
-        showControls,
-        showSpeedMenu,
-        setShowControls,
-        setShowSpeedMenu,
-        controlsTimeoutRef,
-        speedMenuTimeoutRef,
-        mouseMoveThrottleRef
+        isPlaying, showControls, showSpeedMenu,
+        setShowControls, setShowSpeedMenu,
+        controlsTimeoutRef, speedMenuTimeoutRef, mouseMoveThrottleRef
     });
 
     const utilities = useUtilities({
-        src,
-        setToastMessage,
-        setShowToast,
-        toastTimeoutRef
+        src, setToastMessage, setShowToast, toastTimeoutRef
     });
 
-    const changePlaybackSpeed = (speed: number) => {
-        playbackControls.changePlaybackSpeed(speed, speedMenuTimeoutRef, setPlaybackRate, setShowSpeedMenu);
-    };
-
-    useKeyboardShortcuts({
-        videoRef,
-        isPlaying,
-        volume,
-        isPiPSupported,
+    useDesktopShortcuts({
+        videoRef, isPlaying, volume, isPiPSupported,
         togglePlay: playbackControls.togglePlay,
         toggleMute: volumeControls.toggleMute,
         toggleFullscreen: fullscreenControls.toggleFullscreen,
@@ -160,10 +106,7 @@ export function useDesktopPlayerLogic({
         skipForward: skipControls.skipForward,
         skipBackward: skipControls.skipBackward,
         showVolumeBarTemporarily: volumeControls.showVolumeBarTemporarily,
-        setShowControls,
-        setVolume,
-        setIsMuted,
-        controlsTimeoutRef
+        setShowControls, setVolume, setIsMuted, controlsTimeoutRef
     });
 
     return {
@@ -185,7 +128,7 @@ export function useDesktopPlayerLogic({
         showAirPlayMenu: fullscreenControls.showAirPlayMenu,
         skipForward: skipControls.skipForward,
         skipBackward: skipControls.skipBackward,
-        changePlaybackSpeed,
+        changePlaybackSpeed: playbackControls.changePlaybackSpeed,
         handleCopyLink: utilities.handleCopyLink,
         startSpeedMenuTimeout: controlsVisibility.startSpeedMenuTimeout,
         clearSpeedMenuTimeout: controlsVisibility.clearSpeedMenuTimeout,

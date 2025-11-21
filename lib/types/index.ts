@@ -18,7 +18,7 @@ export interface VideoSource {
 export interface VideoItem {
   vod_id: number | string;
   vod_name: string;
-  vod_pic: string;
+  vod_pic?: string;
   type_name?: string;
   vod_remarks?: string;
   vod_year?: string;
@@ -28,6 +28,23 @@ export interface VideoItem {
   vod_content?: string;
   source: string;
   latency?: number; // Response time in milliseconds
+}
+
+export interface Video extends VideoItem {
+  sourceName?: string;
+  isNew?: boolean;
+  relevanceScore?: number;
+}
+
+export interface SourceBadge {
+  id: string;
+  name: string;
+  count: number;
+}
+
+export interface TypeBadge {
+  type: string;
+  count: number;
 }
 
 // Episode Information

@@ -1,0 +1,92 @@
+/* Video Player Components */
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 5px solid color-mix(in srgb, var(--glass-bg) 50%, transparent);
+    border-top-color: var(--accent-color);
+    border-radius: var(--radius-full);
+    animation: spin 1s linear infinite;
+}
+
+.btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    height: 2.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-2xl);
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    position: relative;
+    z-index: 10;
+}
+
+.btn-icon:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.btn-icon:active {
+    transform: scale(0.95);
+}
+
+.slider-track {
+    position: relative;
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    overflow: visible;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.slider-track.h-1 {
+    height: 4px;
+}
+
+.slider-range {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background-color: var(--accent-color);
+    border-radius: var(--radius-full);
+    pointer-events: none;
+}
+
+.slider-thumb {
+    position: absolute;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    background-color: white;
+    border-radius: var(--radius-full);
+    transform: translate(-50%, -50%);
+    cursor: grab;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+}
+
+.slider-track.h-1 .slider-thumb {
+    width: 12px;
+    height: 12px;
+}
+
+.slider-track:hover .slider-thumb {
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+.slider-thumb:active,
+.slider-track:active .slider-thumb {
+    transform: translate(-50%, -50%) scale(1.3);
+    cursor: grabbing;
+}

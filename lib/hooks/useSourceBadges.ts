@@ -1,12 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-
-interface SourceBadge {
-  id: string;
-  name: string;
-  count: number;
-}
+import type { SourceBadge } from '@/lib/types';
 
 /**
  * Custom hook to manage source badge filtering
@@ -27,8 +22,8 @@ export function useSourceBadges<T extends { source?: string; sourceName?: string
     if (selectedSources.size === 0) {
       return videos;
     }
-    
-    return videos.filter(video => 
+
+    return videos.filter(video =>
       video.source && selectedSources.has(video.source)
     );
   }, [videos, selectedSources]);
@@ -49,12 +44,12 @@ export function useSourceBadges<T extends { source?: string; sourceName?: string
   // Auto-cleanup: remove selected sources that no longer exist
   useEffect(() => {
     const availableSourceIds = new Set(availableSources.map(s => s.id));
-    
+
     setSelectedSources(prev => {
       const filtered = new Set(
         Array.from(prev).filter(sourceId => availableSourceIds.has(sourceId))
       );
-      
+
       // Only update if changed
       if (filtered.size !== prev.size) {
         return filtered;

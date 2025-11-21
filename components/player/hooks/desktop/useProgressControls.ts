@@ -1,8 +1,8 @@
 import { useCallback, useEffect } from 'react';
 
 interface UseProgressControlsProps {
-    videoRef: React.RefObject<HTMLVideoElement>;
-    progressBarRef: React.RefObject<HTMLDivElement>;
+    videoRef: React.RefObject<HTMLVideoElement | null>;
+    progressBarRef: React.RefObject<HTMLDivElement | null>;
     duration: number;
     setCurrentTime: (time: number) => void;
     isDraggingProgressRef: React.MutableRefObject<boolean>;

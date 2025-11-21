@@ -1,8 +1,8 @@
 import { useCallback, useEffect } from 'react';
 
 interface UseVolumeControlsProps {
-    videoRef: React.RefObject<HTMLVideoElement>;
-    volumeBarRef: React.RefObject<HTMLDivElement>;
+    videoRef: React.RefObject<HTMLVideoElement | null>;
+    volumeBarRef: React.RefObject<HTMLDivElement | null>;
     volume: number;
     isMuted: boolean;
     setVolume: (volume: number) => void;
