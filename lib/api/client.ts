@@ -1,68 +1,17 @@
 /**
  * API Client for fetching video data from multiple sources
- * Handles parallel requests, timeouts, retries, and data normalization
+ * Handles parallel requests and data normalization
  */
 
 import type {
   VideoSource,
   VideoItem,
   VideoDetail,
-  Episode,
   ApiSearchResponse,
   ApiDetailResponse,
 } from '@/lib/types';
-
-const REQUEST_TIMEOUT = 15000;
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
-
-/**
- * Fetch with timeout support
- */
-async function fetchWithTimeout(
-  url: string,
-  options: RequestInit = {},
-  timeout: number = REQUEST_TIMEOUT
-): Promise<Response> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-  try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
-    return response;
-  } catch (error) {
-    clearTimeout(timeoutId);
-    throw error;
-  }
-}
-
-/**
- * Retry logic wrapper
- */
-async function withRetry<T>(
-  fn: () => Promise<T>,
-  retries: number = MAX_RETRIES
-): Promise<T> {
-  let lastError: Error | null = null;
-
-  for (let i = 0; i <= retries; i++) {
-    try {
-      return await fn();
-    } catch (error) {
-      lastError = error as Error;
-
-      if (i < retries) {
-        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (i + 1)));
-      }
-    }
-  }
-
-  throw lastError;
-}
+import { fetchWithTimeout, withRetry } from './http-utils';
+import { parseEpisodes } from './parsers';
 
 /**
  * Search videos from a single source
@@ -146,29 +95,7 @@ export async function searchVideos(
   return Promise.all(searchPromises);
 }
 
-/**
- * Parse episode URL string into structured array
- */
-function parseEpisodes(playUrl: string): Episode[] {
-  if (!playUrl) return [];
 
-  try {
-    // Format: "Episode1$url1#Episode2$url2#..."
-    const episodes = playUrl.split('#').filter(Boolean);
-
-    return episodes.map((episode, index) => {
-      const [name, url] = episode.split('$');
-      return {
-        name: name || `Episode ${index + 1}`,
-        url: url || '',
-        index,
-      };
-    });
-  } catch (error) {
-    console.error('Failed to parse episodes:', error);
-    return [];
-  }
-}
 
 /**
  * Get video detail from a single source

@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from 'react';
 import { getSourceName, SOURCE_IDS } from '@/lib/utils/source-names';
 import { calculateRelevanceScore } from '@/lib/utils/search';
 import { sortVideos } from '@/lib/utils/sort';
+import { binaryInsertVideos } from '@/lib/utils/sorted-insert';
 import type { SortOption } from '@/lib/store/settings-store';
 
 interface Video {
@@ -119,44 +120,8 @@ export function useParallelSearch(
               }));
 
 
-
-              // Optimized: Insert new videos in sorted position instead of re-sorting entire array
-              setResults((prev) => {
-                if (prev.length === 0) return newVideos;
-
-                // Binary insert for better performance with combined sorting
-                const combined = [...prev];
-                for (const video of newVideos) {
-                  const relevanceScore = video.relevanceScore || 0;
-                  const latency = video.latency || 99999; // Default high latency for sorting
-
-                  // Find insert position using binary search
-                  // Sort by: 1) relevance score (DESC), 2) latency (ASC)
-                  let left = 0;
-                  let right = combined.length;
-                  while (left < right) {
-                    const mid = Math.floor((left + right) / 2);
-                    const midRelevance = combined[mid].relevanceScore || 0;
-                    const midLatency = combined[mid].latency || 99999;
-
-                    // Compare by relevance first
-                    if (midRelevance > relevanceScore) {
-                      left = mid + 1;
-                    } else if (midRelevance < relevanceScore) {
-                      right = mid;
-                    } else {
-                      // Same relevance, compare by latency (lower is better)
-                      if (midLatency < latency) {
-                        left = mid + 1;
-                      } else {
-                        right = mid;
-                      }
-                    }
-                  }
-                  combined.splice(left, 0, video);
-                }
-                return combined;
-              });
+              // Optimized: Insert new videos in sorted position
+              setResults((prev) => binaryInsertVideos(prev, newVideos));
 
               // Update source stats
               if (!sourcesMap.has(data.source)) {
