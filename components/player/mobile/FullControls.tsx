@@ -7,6 +7,7 @@ interface FullControlsProps {
     isFullscreen: boolean;
     showVolumeMenu: boolean;
     showSpeedMenu: boolean;
+    showMoreMenu: boolean;
     isMuted: boolean;
     volume: number;
     playbackRate: number;
@@ -25,6 +26,7 @@ interface FullControlsProps {
     onToggleMute: () => void;
     onVolumeChange: (volume: number) => void;
     onSpeedChange: (speed: number) => void;
+    onCopyLink: () => void;
     iconSize: number;
     buttonPadding: string;
     controlsGap: string;
@@ -36,6 +38,7 @@ export function FullControls({
     isFullscreen,
     showVolumeMenu,
     showSpeedMenu,
+    showMoreMenu,
     isMuted,
     volume,
     playbackRate,
@@ -54,6 +57,7 @@ export function FullControls({
     onToggleMute,
     onVolumeChange,
     onSpeedChange,
+    onCopyLink,
     iconSize,
     buttonPadding,
     controlsGap,
@@ -85,12 +89,17 @@ export function FullControls({
             <RightControls
                 playbackRate={playbackRate}
                 showSpeedMenu={showSpeedMenu}
+                showMoreMenu={showMoreMenu}
                 onToggleSpeedMenu={onToggleSpeedMenu}
                 speeds={speeds}
                 onSpeedChange={onSpeedChange}
                 isPiPSupported={isPiPSupported}
                 onTogglePiP={onTogglePiP}
                 onToggleMoreMenu={onToggleMoreMenu}
+                onToggleVolumeMenu={onToggleVolumeMenu}
+                onCopyLink={onCopyLink}
+                isMuted={isMuted}
+                volume={volume}
                 isFullscreen={isFullscreen}
                 onToggleFullscreen={onToggleFullscreen}
                 iconSize={iconSize}

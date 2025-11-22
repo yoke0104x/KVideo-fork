@@ -1,7 +1,5 @@
 import React from 'react';
 import { MobileProgressBar } from './MobileProgressBar';
-import { MobileVolumeMenu } from './MobileVolumeMenu';
-import { MobileSpeedMenu } from './MobileSpeedMenu';
 import { CompactControls } from './CompactControls';
 import { FullControls } from './FullControls';
 
@@ -103,25 +101,6 @@ export function MobileControls(props: MobileControlsProps) {
                         textSize={textSize}
                     />
                 )}
-
-                <MobileVolumeMenu
-                    showVolumeMenu={showVolumeMenu}
-                    isCompactLayout={true}
-                    isMuted={isMuted}
-                    volume={volume}
-                    onToggleMute={onToggleMute}
-                    onVolumeChange={onVolumeChange}
-                    onClose={onToggleVolumeMenu}
-                />
-
-                <MobileSpeedMenu
-                    showSpeedMenu={showSpeedMenu}
-                    isCompactLayout={true}
-                    playbackRate={playbackRate}
-                    speeds={speeds}
-                    onSpeedChange={onSpeedChange}
-                    onClose={onToggleSpeedMenu}
-                />
             </div>
         </div>
     );

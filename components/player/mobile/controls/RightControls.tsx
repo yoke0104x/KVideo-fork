@@ -1,16 +1,22 @@
 import React from 'react';
 import { Icons } from '@/components/ui/Icon';
 import { MobileSpeedMenu } from '../MobileSpeedMenu';
+import { MobileMoreMenu } from '../MobileMoreMenu';
 
 interface RightControlsProps {
     playbackRate: number;
     showSpeedMenu: boolean;
+    showMoreMenu: boolean;
     onToggleSpeedMenu: () => void;
     speeds: number[];
     onSpeedChange: (speed: number) => void;
     isPiPSupported: boolean;
     onTogglePiP: () => void;
     onToggleMoreMenu: () => void;
+    onToggleVolumeMenu: () => void;
+    onCopyLink: () => void;
+    isMuted: boolean;
+    volume: number;
     isFullscreen: boolean;
     onToggleFullscreen: () => void;
     iconSize: number;
@@ -22,12 +28,17 @@ interface RightControlsProps {
 export function RightControls({
     playbackRate,
     showSpeedMenu,
+    showMoreMenu,
     onToggleSpeedMenu,
     speeds,
     onSpeedChange,
     isPiPSupported,
     onTogglePiP,
     onToggleMoreMenu,
+    onToggleVolumeMenu,
+    onCopyLink,
+    isMuted,
+    volume,
     isFullscreen,
     onToggleFullscreen,
     iconSize,
@@ -74,21 +85,47 @@ export function RightControls({
                 </button>
             )}
 
-            <button
-                onClick={(e) => {
-                    e.stopPropagation();
-                    onToggleMoreMenu();
-                }}
-                className={`btn-icon ${buttonPadding} flex-shrink-0 touch-manipulation`}
-                aria-label="更多"
-                style={{ WebkitTapHighlightColor: 'transparent' }}
-            >
-                <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="1" />
-                    <circle cx="12" cy="5" r="1" />
-                    <circle cx="12" cy="19" r="1" />
-                </svg>
-            </button>
+            <div className="relative z-[60]">
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onToggleMoreMenu();
+                    }}
+                    className={`btn-icon ${buttonPadding} flex-shrink-0 touch-manipulation`}
+                    aria-label="更多"
+                    style={{ WebkitTapHighlightColor: 'transparent' }}
+                >
+                    <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="1" />
+                        <circle cx="12" cy="5" r="1" />
+                        <circle cx="12" cy="19" r="1" />
+                    </svg>
+                </button>
+
+                <MobileMoreMenu
+                    showMoreMenu={showMoreMenu}
+                    isMuted={isMuted}
+                    volume={volume}
+                    playbackRate={playbackRate}
+                    isPiPSupported={isPiPSupported}
+                    onCopyLink={() => {
+                        onToggleMoreMenu();
+                        onCopyLink();
+                    }}
+                    onToggleVolumeMenu={() => {
+                        onToggleMoreMenu();
+                        onToggleVolumeMenu();
+                    }}
+                    onToggleSpeedMenu={() => {
+                        onToggleMoreMenu();
+                        onToggleSpeedMenu();
+                    }}
+                    onTogglePiP={() => {
+                        onToggleMoreMenu();
+                        onTogglePiP();
+                    }}
+                />
+            </div>
 
             <button
                 onClick={(e) => {
