@@ -14,7 +14,7 @@ interface DownloadQueueOptions {
     videoUrl?: string; // The m3u8 URL for metadata tracking
 }
 
-const CONCURRENCY = 5;
+const CONCURRENCY = 2;
 const TIMEOUT_MS = 15000;
 const CACHE_NAME = 'video-cache-v1';
 
@@ -45,8 +45,7 @@ export async function downloadSegmentQueue(options: DownloadQueueOptions): Promi
             const isValid = match ? await cacheManager.isCacheValid(url) : false;
 
             if (match && isValid) {
-                onProgress?.(currentIndex, segments.length);
-                console.log(`[Preloader] 已缓存且有效: ${currentIndex}/${segments.length}`);
+                // Silently skip cached segments
             } else {
                 // If cache exists but expired, delete it
                 if (match && !isValid) {

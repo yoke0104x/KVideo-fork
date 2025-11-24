@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 interface UseProgressControlsProps {
     videoRef: React.RefObject<HTMLVideoElement | null>;
@@ -15,6 +15,8 @@ export function useProgressControls({
     setCurrentTime,
     isDraggingProgressRef
 }: UseProgressControlsProps) {
+    const lastDragTimeRef = useRef<number>(0);
+
     const handleProgressClick = useCallback((e: any) => {
         if (!videoRef.current || !progressBarRef.current) return;
         const rect = progressBarRef.current.getBoundingClientRect();
@@ -37,13 +39,16 @@ export function useProgressControls({
             const rect = progressBarRef.current.getBoundingClientRect();
             const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
             const newTime = pos * duration;
-            videoRef.current.currentTime = newTime;
+            lastDragTimeRef.current = newTime;
             setCurrentTime(newTime);
         };
 
         const handleMouseUp = () => {
             if (isDraggingProgressRef.current) {
                 isDraggingProgressRef.current = false;
+                if (videoRef.current) {
+                    videoRef.current.currentTime = lastDragTimeRef.current;
+                }
             }
         };
 

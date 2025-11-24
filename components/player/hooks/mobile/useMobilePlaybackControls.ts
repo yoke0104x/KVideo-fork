@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { formatTime } from '@/lib/utils/format-utils';
 import { usePlaybackPolling } from '../usePlaybackPolling';
 import { useMobileTogglePlay } from './useMobileTogglePlay';
@@ -81,14 +81,20 @@ export function useMobilePlaybackControls({
         });
     }, [videoRef, setDuration, setIsLoading, initialTime]);
 
+    const hasInitialSeekHappened = useRef(false);
+
     // Handle late initialization of initialTime (e.g. from async storage hydration)
     useEffect(() => {
-        if (initialTime > 0 && videoRef.current) {
+        if (initialTime > 0 && videoRef.current && !hasInitialSeekHappened.current) {
             // Only seek if we haven't progressed far (e.g. still near start)
             // AND if the target time is significantly different from current time (> 0.5s)
             // This prevents jumping if the user has already started watching and initialTime updates
             if (videoRef.current.currentTime < 2 && Math.abs(videoRef.current.currentTime - initialTime) > 0.5) {
                 videoRef.current.currentTime = initialTime;
+                hasInitialSeekHappened.current = true;
+            } else if (videoRef.current.currentTime >= 2) {
+                // If user already watched past 2s, assume they don't want to be reset
+                hasInitialSeekHappened.current = true;
             }
         }
     }, [initialTime, videoRef]);

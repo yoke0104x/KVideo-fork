@@ -47,11 +47,8 @@ export function useMobileProgressControls({
         const newTime = updateProgressFromEvent(e);
         if (newTime !== undefined) {
             setCurrentTime(newTime);
-            if (videoRef.current) {
-                videoRef.current.currentTime = newTime;
-            }
         }
-    }, [isDraggingProgressRef, updateProgressFromEvent, setCurrentTime, videoRef]);
+    }, [isDraggingProgressRef, updateProgressFromEvent, setCurrentTime]);
 
     const handleProgressTouchEnd = useCallback((e: any) => {
         if (!isDraggingProgressRef.current) return;

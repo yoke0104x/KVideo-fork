@@ -31,7 +31,7 @@ export function MobileVideoPlayer({
   const { currentTime } = state;
 
   // Preload HLS segments
-  useHLSPreloader({ src, currentTime });
+  useHLSPreloader({ src, currentTime, videoRef: refs.videoRef, isLoading: state.isLoading });
 
   const {
     videoRef,
@@ -97,7 +97,7 @@ export function MobileVideoPlayer({
       {/* Video Element */}
       <video
         ref={videoRef}
-        className="w-full h-full object-contain"
+        className="w-full h-full object-contain touch-none"
         src={src}
         poster={poster}
         onPlay={handlePlay}
@@ -108,6 +108,7 @@ export function MobileVideoPlayer({
         onWaiting={() => setIsLoading(true)}
         onCanPlay={() => setIsLoading(false)}
         onTouchEnd={handleTap}
+        onClick={(e) => e.preventDefault()}
         playsInline
         webkit-playsinline="true"
         x-webkit-airplay="allow"

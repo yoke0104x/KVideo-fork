@@ -27,7 +27,7 @@ export function DesktopVideoPlayer({
   const { currentTime } = state;
 
   // Preload HLS segments
-  useHLSPreloader({ src, currentTime });
+  useHLSPreloader({ src, currentTime, videoRef: refs.videoRef, isLoading: state.isLoading });
 
   const {
     videoRef,

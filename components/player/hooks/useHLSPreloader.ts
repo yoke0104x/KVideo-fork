@@ -5,15 +5,18 @@ import { downloadSegmentQueue } from '@/lib/utils/segmentDownloader';
 interface UseHLSPreloaderProps {
     src: string;
     currentTime: number;
+    videoRef: React.RefObject<HTMLVideoElement | null>;
+    isLoading: boolean;
 }
 
-export function useHLSPreloader({ src, currentTime }: UseHLSPreloaderProps) {
+export function useHLSPreloader({ src, currentTime, videoRef, isLoading }: UseHLSPreloaderProps) {
     const abortControllerRef = useRef<AbortController | null>(null);
     const segmentsRef = useRef<Segment[]>([]);
     const [isManifestLoaded, setIsManifestLoaded] = useState(false);
     const lastStartIndexRef = useRef<number>(-1);
     const isInitializedRef = useRef(false);
     const downloadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const lastCurrentTimeRef = useRef<number>(0);
 
     // Fetch and parse manifest when src changes
     useEffect(() => {
@@ -51,6 +54,15 @@ export function useHLSPreloader({ src, currentTime }: UseHLSPreloaderProps) {
     useEffect(() => {
         if (!isManifestLoaded || segmentsRef.current.length === 0) return;
 
+        // Stop if player is struggling (loading)
+        if (isLoading) {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+                abortControllerRef.current = null;
+            }
+            return;
+        }
+
         // Clear any pending download timeout
         if (downloadTimeoutRef.current) {
             clearTimeout(downloadTimeoutRef.current);
@@ -64,6 +76,25 @@ export function useHLSPreloader({ src, currentTime }: UseHLSPreloaderProps) {
                 if (currentTime < segmentsRef.current[i].startTime + segmentsRef.current[i].duration) {
                     startIndex = i;
                     break;
+                }
+            }
+
+            // Check browser buffer health
+            if (videoRef.current) {
+                const buffered = videoRef.current.buffered;
+                let bufferEnd = 0;
+                for (let i = 0; i < buffered.length; i++) {
+                    if (buffered.start(i) <= currentTime && buffered.end(i) >= currentTime) {
+                        bufferEnd = buffered.end(i);
+                        break;
+                    }
+                }
+
+                // If browser buffer is less than 30s ahead, let browser handle it
+                // Only preload if we are "safe"
+                if (bufferEnd - currentTime < 30) {
+                    // console.log('[Preloader] Browser buffer low (<30s), yielding to browser.');
+                    return;
                 }
             }
 
@@ -104,9 +135,11 @@ export function useHLSPreloader({ src, currentTime }: UseHLSPreloaderProps) {
                 signal: abortControllerRef.current.signal,
                 videoUrl: src // Pass the m3u8 URL for metadata tracking
             });
-        }, isInitializedRef.current ? 0 : 100); // 100ms debounce on initial load only
+        }, !isInitializedRef.current ? 100 : (Math.abs(currentTime - lastCurrentTimeRef.current) > 2 ? 2000 : 500));
 
-    }, [isManifestLoaded, currentTime]);
+        lastCurrentTimeRef.current = currentTime;
+
+    }, [isManifestLoaded, currentTime, isLoading, videoRef]);
 
     // Cleanup on unmount
     useEffect(() => {

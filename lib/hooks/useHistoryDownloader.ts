@@ -6,6 +6,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { useHistoryStore } from '@/lib/store/history-store';
 import { parseHLSManifest } from '@/lib/utils/hlsManifestParser';
 import { downloadSegmentQueue } from '@/lib/utils/segmentDownloader';
@@ -13,8 +14,12 @@ import { downloadSegmentQueue } from '@/lib/utils/segmentDownloader';
 export function useHistoryDownloader() {
     const viewingHistory = useHistoryStore((state) => state.viewingHistory);
     const processedUrlsRef = useRef<Set<string>>(new Set());
+    const pathname = usePathname();
 
     useEffect(() => {
+        // Don't download history while watching a video
+        if (pathname?.startsWith('/player')) return;
+
         if (viewingHistory.length === 0) return;
 
         const downloadHistoryVideos = async () => {
