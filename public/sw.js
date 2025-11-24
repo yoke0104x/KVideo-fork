@@ -30,17 +30,27 @@ self.addEventListener('fetch', (event) => {
     if (url.pathname.endsWith('.m3u8')) {
         event.respondWith(
             caches.open(CACHE_NAME).then((cache) => {
-                return cache.match(event.request, { ignoreSearch: true }).then((response) => {
+                return cache.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
                     // Always fetch fresh manifest but return cached while fetching
                     const fetchPromise = fetch(event.request).then((networkResponse) => {
-                        if (networkResponse && networkResponse.status === 200) {
-                            cache.put(event.request, networkResponse.clone());
+                        // Check if network response is valid
+                        if (!networkResponse || networkResponse.status !== 200) {
+                            throw new Error('Network response was not ok');
                         }
+                        cache.put(event.request, networkResponse.clone());
                         return networkResponse;
-                    }).catch(() => response); // Fallback to cache on network error
+                    }).catch((err) => {
+                        // If network fails, return cached response if available
+                        if (cachedResponse) {
+                            return cachedResponse;
+                        }
+                        // If no cache and network fails, throw error so browser handles it
+                        // This allows the client (VideoPlayer) to catch the error and retry with proxy
+                        throw err;
+                    });
 
                     // Return cache immediately if available, otherwise wait for network
-                    return response || fetchPromise;
+                    return cachedResponse || fetchPromise;
                 });
             })
         );
@@ -61,10 +71,14 @@ self.addEventListener('fetch', (event) => {
                         // Only cache valid responses
                         if (response && response.status === 200) {
                             cache.put(event.request, response.clone());
+                            return response;
                         }
+                        // If response is not valid (e.g. 403, 404), return it as is
+                        // so the browser/player can handle the error status
                         return response;
                     }).catch((error) => {
                         console.error('[SW] Failed to fetch segment:', error);
+                        // Throw error to let browser handle it
                         throw error;
                     });
                 });
