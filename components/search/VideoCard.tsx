@@ -7,7 +7,6 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Icons } from '@/components/ui/Icon';
 import { LatencyBadge } from '@/components/ui/LatencyBadge';
-import { getOptimizedImageUrl } from '@/lib/utils/image-utils';
 
 import { Video } from '@/lib/types';
 
@@ -57,7 +56,7 @@ export const VideoCard = memo<VideoCardProps>(({
                     <div className="relative aspect-[2/3] bg-[color-mix(in_srgb,var(--glass-bg)_50%,transparent)] overflow-hidden rounded-[var(--radius-2xl)]">
                         {video.vod_pic ? (
                             <Image
-                                src={getOptimizedImageUrl(video.vod_pic, 400)}
+                                src={video.vod_pic}
                                 alt={video.vod_name}
                                 fill
                                 className="object-cover rounded-[var(--radius-2xl)]"
