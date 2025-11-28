@@ -32,6 +32,7 @@ interface TagManagerProps {
   selectedTag: string;
   showTagManager: boolean;
   newTagInput: string;
+  justAddedTag: boolean;
   onTagSelect: (tagId: string) => void;
   onTagDelete: (tagId: string) => void;
   onToggleManager: () => void;
@@ -39,6 +40,7 @@ interface TagManagerProps {
   onNewTagInputChange: (value: string) => void;
   onAddTag: () => void;
   onDragEnd: (event: DragEndEvent) => void;
+  onJustAddedTagHandled: () => void;
 }
 
 function SortableTag({
@@ -112,6 +114,7 @@ export function TagManager({
   selectedTag,
   showTagManager,
   newTagInput,
+  justAddedTag,
   onTagSelect,
   onTagDelete,
   onToggleManager,
@@ -119,6 +122,7 @@ export function TagManager({
   onNewTagInputChange,
   onAddTag,
   onDragEnd,
+  onJustAddedTagHandled,
 }: TagManagerProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const prevTagsLength = useRef(tags.length);
@@ -137,16 +141,14 @@ export function TagManager({
 
   // Auto-scroll to end when new tag is added
   useEffect(() => {
-    if (tags.length > prevTagsLength.current) {
-      if (scrollContainerRef.current) {
-        scrollContainerRef.current.scrollTo({
-          left: scrollContainerRef.current.scrollWidth,
-          behavior: 'smooth',
-        });
-      }
+    if (justAddedTag && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        left: scrollContainerRef.current.scrollWidth,
+        behavior: 'smooth',
+      });
+      onJustAddedTagHandled();
     }
-    prevTagsLength.current = tags.length;
-  }, [tags.length]);
+  }, [justAddedTag, onJustAddedTagHandled]);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);

@@ -29,6 +29,7 @@ export function useTagManager() {
     const [tags, setTags] = useState(DEFAULT_TAGS);
     const [newTagInput, setNewTagInput] = useState('');
     const [showTagManager, setShowTagManager] = useState(false);
+    const [justAddedTag, setJustAddedTag] = useState(false);
 
     // Load custom tags from localStorage
     useEffect(() => {
@@ -56,6 +57,7 @@ export function useTagManager() {
         };
         saveTags([...tags, newTag]);
         setNewTagInput('');
+        setJustAddedTag(true);
     };
 
     const handleDeleteTag = (tagId: string) => {
@@ -86,9 +88,11 @@ export function useTagManager() {
         selectedTag,
         newTagInput,
         showTagManager,
+        justAddedTag,
         setSelectedTag,
         setNewTagInput,
         setShowTagManager,
+        setJustAddedTag,
         handleAddTag,
         handleDeleteTag,
         handleRestoreDefaults,
