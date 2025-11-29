@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { AddSourceModal } from '@/components/settings/AddSourceModal';
 import { ExportModal } from '@/components/settings/ExportModal';
 import { ImportModal } from '@/components/settings/ImportModal';
@@ -44,7 +45,9 @@ export default function SettingsPage() {
         <SettingsHeader />
 
         {/* Account Settings */}
-        <AccountSettings />
+        <Suspense fallback={<div className="p-6 rounded-[var(--radius-2xl)] bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl">加载中...</div>}>
+          <AccountSettings />
+        </Suspense>
 
         {/* Source Management */}
         <SourceSettings
