@@ -1,17 +1,23 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuthStore, type LinuxDoUser } from '@/lib/store/auth-store';
 import { useHistoryStore } from '@/lib/store/history-store';
 import { useSearchHistoryStore } from '@/lib/store/search-history-store';
 
 export function AccountSettings() {
+    const [isHydrated, setIsHydrated] = useState(false);
     const searchParams = useSearchParams();
     const router = useRouter();
     const { user, isAuthenticated, login, logout } = useAuthStore();
     const { clearHistory } = useHistoryStore();
     const { clearSearchHistory } = useSearchHistoryStore();
+
+    // Wait for Zustand to hydrate from localStorage
+    useEffect(() => {
+        setIsHydrated(true);
+    }, []);
 
     useEffect(() => {
         const authSuccess = searchParams.get('auth_success');
@@ -21,13 +27,9 @@ export function AccountSettings() {
         if (authSuccess && token && userStr) {
             try {
                 const userData = JSON.parse(userStr) as LinuxDoUser;
-                // Clear existing data before logging in new user
                 clearHistory();
                 clearSearchHistory();
-
                 login(userData, token);
-
-                // Clean URL
                 router.replace('/settings');
             } catch (e) {
                 console.error('Failed to parse user data', e);
@@ -36,7 +38,6 @@ export function AccountSettings() {
     }, [searchParams, login, clearHistory, clearSearchHistory, router]);
 
     const handleLogin = () => {
-        // Clear data before redirecting to ensure clean state
         clearHistory();
         clearSearchHistory();
         router.push('/api/oauth/authorize');
@@ -47,6 +48,24 @@ export function AccountSettings() {
         clearHistory();
         clearSearchHistory();
     };
+
+    // Don't render until hydrated to prevent flash
+    if (!isHydrated) {
+        return (
+            <section className="space-y-6">
+                <div className="flex items-center gap-3 pb-2 border-b border-[var(--glass-border)]">
+                    <svg className="w-6 h-6 text-[var(--accent-color)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    <h2 className="text-xl font-semibold text-[var(--text-color)]">账号</h2>
+                </div>
+                <div className="p-6 rounded-[var(--radius-2xl)] bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl">
+                    <div className="flex items-center justify-center text-[var(--text-color-secondary)]">加载中...</div>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section className="space-y-6">
