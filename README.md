@@ -141,10 +141,7 @@ npm install
 如果你使用其他包管理器：
 
 ```bash
-# 使用 yarn
 yarn install
-
-# 使用 pnpm
 pnpm install
 ```
 
@@ -159,10 +156,7 @@ npm run dev
 #### 4. 构建生产版本
 
 ```bash
-# 构建
 npm run build
-
-# 启动生产服务器
 npm start
 ```
 
