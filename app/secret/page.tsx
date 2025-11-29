@@ -6,6 +6,7 @@ import { NoResults } from '@/components/search/NoResults';
 import { Navbar } from '@/components/layout/Navbar';
 import { SearchResults } from '@/components/home/SearchResults';
 import { useSecretHomePage } from '@/lib/hooks/useSecretHomePage';
+import { AdultContent } from '@/components/adult/AdultContent';
 
 function SecretHomePage() {
     const {
@@ -58,14 +59,9 @@ function SecretHomePage() {
                     <NoResults onReset={handleReset} />
                 )}
 
-                {/* Empty State - Adult content zone */}
+                {/* Adult Content - Trending and Latest */}
                 {!loading && !hasSearched && (
-                    <div className="flex flex-col items-center justify-center py-20 text-center">
-                        <p className="text-lg text-[var(--text-color)] mb-2">18+ 专区</p>
-                        <p className="text-sm text-[var(--text-color-secondary)]">
-                            此区域的搜索记录不会显示在首页历史
-                        </p>
-                    </div>
+                    <AdultContent onSearch={handleSearch} />
                 )}
             </main>
         </div>
