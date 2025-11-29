@@ -4,7 +4,7 @@ export function SettingsHeader() {
     const router = useRouter();
 
     return (
-        <div className="mb-8">
+        <div>
             <button
                 onClick={() => router.back()}
                 className="inline-flex items-center gap-2 text-[var(--accent-color)] hover:underline mb-4 cursor-pointer"

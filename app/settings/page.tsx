@@ -8,6 +8,7 @@ import { SourceSettings } from '@/components/settings/SourceSettings';
 import { SortSettings } from '@/components/settings/SortSettings';
 import { DataSettings } from '@/components/settings/DataSettings';
 import { SettingsHeader } from '@/components/settings/SettingsHeader';
+import { AccountSettings } from '@/components/settings/AccountSettings';
 import { useSettingsPage } from './hooks/useSettingsPage';
 
 export default function SettingsPage() {
@@ -38,9 +39,12 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg-color)] bg-[image:var(--bg-image)] bg-fixed">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-8 max-w-4xl space-y-8">
         {/* Header */}
         <SettingsHeader />
+
+        {/* Account Settings */}
+        <AccountSettings />
 
         {/* Source Management */}
         <SourceSettings
