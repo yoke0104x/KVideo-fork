@@ -9,7 +9,6 @@ import { useMobileGestures } from './hooks/useMobileGestures';
 import { MobileControlsWrapper } from './mobile/MobileControlsWrapper';
 import { MobileOverlay } from './mobile/MobileOverlay';
 import { MobileSkipIndicator } from './mobile/MobileSkipIndicator';
-import { getProxyUrl } from './utils/urlUtils';
 
 interface MobileVideoPlayerProps {
   src: string;
@@ -88,8 +87,6 @@ export function MobileVideoPlayer({
     togglePlay,
   });
 
-  const proxiedSrc = getProxyUrl(src);
-
   return (
     <div
       ref={containerRef}
@@ -99,7 +96,7 @@ export function MobileVideoPlayer({
       <video
         ref={videoRef}
         className="w-full h-full object-contain touch-none"
-        src={proxiedSrc}
+        src={src}
         poster={poster}
         onPlay={handlePlay}
         onPause={handlePause}
