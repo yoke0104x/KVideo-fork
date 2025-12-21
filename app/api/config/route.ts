@@ -5,6 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
+export const runtime = 'edge';
+
 const ACCESS_PASSWORD = process.env.ACCESS_PASSWORD || '';
 
 export async function GET() {
