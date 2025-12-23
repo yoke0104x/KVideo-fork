@@ -88,13 +88,7 @@ function PlayerContent() {
   };
 
   const episodes = videoData?.episodes || [];
-  const hasPrev = currentEpisode > 0;
   const hasNext = currentEpisode < episodes.length - 1;
-
-  const handlePrevEpisode = () => {
-    if (hasPrev) handleEpisodeClick(episodes[currentEpisode - 1], currentEpisode - 1);
-  };
-
   const handleNextEpisode = () => {
     if (hasNext) handleEpisodeClick(episodes[currentEpisode + 1], currentEpisode + 1);
   };
@@ -124,10 +118,7 @@ function PlayerContent() {
                 videoId={videoId || undefined}
                 currentEpisode={currentEpisode}
                 onBack={() => router.back()}
-                onPrevEpisode={handlePrevEpisode}
                 onNextEpisode={handleNextEpisode}
-                hasPrevEpisode={hasPrev}
-                hasNextEpisode={hasNext}
               />
               {/* Episode Navigation Buttons */}
             </div>
