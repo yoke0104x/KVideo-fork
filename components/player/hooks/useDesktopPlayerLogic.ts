@@ -55,7 +55,9 @@ export function useDesktopPlayerLogic({
         showSkipForwardIndicator, setShowSkipForwardIndicator,
         showSkipBackwardIndicator, setShowSkipBackwardIndicator,
         setIsSkipForwardAnimatingOut, setIsSkipBackwardAnimatingOut,
-        setShowVolumeBar, setToastMessage, setShowToast
+        setShowVolumeBar, setToastMessage, setShowToast,
+        isWideScreen, setIsWideScreen,
+        isWebFullscreen, setIsWebFullscreen
     } = state;
 
     const playbackControls = usePlaybackControls({
@@ -87,6 +89,7 @@ export function useDesktopPlayerLogic({
 
     const fullscreenControls = useFullscreenControls({
         containerRef, videoRef, isFullscreen, setIsFullscreen,
+        isWideScreen, setIsWideScreen, isWebFullscreen, setIsWebFullscreen,
         isPiPSupported, isAirPlaySupported, setIsPiPSupported, setIsAirPlaySupported
     });
 
@@ -129,6 +132,8 @@ export function useDesktopPlayerLogic({
         toggleFullscreen: fullscreenControls.toggleFullscreen,
         togglePictureInPicture: fullscreenControls.togglePictureInPicture,
         showAirPlayMenu: fullscreenControls.showAirPlayMenu,
+        toggleWideScreen: fullscreenControls.toggleWideScreen,
+        toggleWebFullscreen: fullscreenControls.toggleWebFullscreen,
         skipForward: skipControls.skipForward,
         skipBackward: skipControls.skipBackward,
         changePlaybackSpeed: playbackControls.changePlaybackSpeed,

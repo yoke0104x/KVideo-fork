@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { usePlayerStore } from '@/lib/store/player-store';
 
 export function useDesktopPlayerState() {
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -18,6 +19,9 @@ export function useDesktopPlayerState() {
     const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const moreMenuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+    // Use store for wide screen and web fullscreen
+    const { isWideScreen, setIsWideScreen, isWebFullscreen, setIsWebFullscreen } = usePlayerStore();
+
     // State
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
@@ -26,7 +30,7 @@ export function useDesktopPlayerState() {
     const [isMuted, setIsMuted] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showControls, setShowControls] = useState(true);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [playbackRate, setPlaybackRate] = useState(1);
     const [showSpeedMenu, setShowSpeedMenu] = useState(false);
     const [isPiPSupported, setIsPiPSupported] = useState(false);
@@ -81,7 +85,9 @@ export function useDesktopPlayerState() {
             showVolumeBar, setShowVolumeBar,
             toastMessage, setToastMessage,
             showToast, setShowToast,
-            showMoreMenu, setShowMoreMenu
+            showMoreMenu, setShowMoreMenu,
+            isWideScreen, setIsWideScreen,
+            isWebFullscreen, setIsWebFullscreen
         }
     };
 }

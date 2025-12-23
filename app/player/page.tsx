@@ -3,31 +3,32 @@
 import { Suspense, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
+import { Icons } from '@/components/ui/Icon';
 import { VideoPlayer } from '@/components/player/VideoPlayer';
 import { VideoMetadata } from '@/components/player/VideoMetadata';
 import { EpisodeList } from '@/components/player/EpisodeList';
 import { PlayerError } from '@/components/player/PlayerError';
 import { useVideoPlayer } from '@/lib/hooks/useVideoPlayer';
 import { useHistoryStore } from '@/lib/store/history-store';
+import { usePlayerStore } from '@/lib/store/player-store';
 import { WatchHistorySidebar } from '@/components/history/WatchHistorySidebar';
 import { PlayerNavbar } from '@/components/player/PlayerNavbar';
-import Image from 'next/image';
+
+interface Episode {
+  name?: string;
+  url: string;
+}
 
 function PlayerContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { addToHistory } = useHistoryStore();
+  const { isWideScreen, isWebFullscreen } = usePlayerStore();
 
   const videoId = searchParams.get('id');
   const source = searchParams.get('source');
   const title = searchParams.get('title');
   const episodeParam = searchParams.get('episode');
-
-  // Redirect if no video ID or source
-  if (!videoId || !source) {
-    router.push('/');
-    return null;
-  }
 
   const {
     videoData,
@@ -39,12 +40,17 @@ function PlayerContent() {
     setPlayUrl,
     setVideoError,
     fetchVideoDetails,
-  } = useVideoPlayer(videoId, source, episodeParam);
+  } = useVideoPlayer(videoId || '', source || '', episodeParam);
+
+  // Hide scrollbar when web fullscreen
+  useEffect(() => {
+    document.body.style.overflow = isWebFullscreen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [isWebFullscreen]);
 
   // Add initial history entry when video data is loaded
   useEffect(() => {
     if (videoData && playUrl && videoId) {
-      // Map episodes to include index
       const mappedEpisodes = videoData.episodes?.map((ep, idx) => ({
         name: ep.name || `第${idx + 1}集`,
         url: ep.url,
@@ -56,32 +62,48 @@ function PlayerContent() {
         videoData.vod_name || title || '未知视频',
         playUrl,
         currentEpisode,
-        source,
-        0, // Initial playback position
-        0, // Will be updated by VideoPlayer
+        source || '',
+        0,
+        0,
         videoData.vod_pic,
         mappedEpisodes
       );
     }
   }, [videoData, playUrl, videoId, currentEpisode, source, title, addToHistory]);
 
-  const handleEpisodeClick = (episode: any, index: number) => {
+  // Redirect if no video ID or source
+  if (!videoId || !source) {
+    router.push('/');
+    return null;
+  }
+
+  const handleEpisodeClick = (episode: Episode, index: number) => {
     setCurrentEpisode(index);
     setPlayUrl(episode.url);
     setVideoError('');
 
-    // Update URL to reflect current episode
     const params = new URLSearchParams(searchParams.toString());
     params.set('episode', index.toString());
     router.replace(`/player?${params.toString()}`, { scroll: false });
   };
 
+  const episodes = videoData?.episodes || [];
+  const hasPrev = currentEpisode > 0;
+  const hasNext = currentEpisode < episodes.length - 1;
+
+  const handlePrevEpisode = () => {
+    if (hasPrev) handleEpisodeClick(episodes[currentEpisode - 1], currentEpisode - 1);
+  };
+
+  const handleNextEpisode = () => {
+    if (hasNext) handleEpisodeClick(episodes[currentEpisode + 1], currentEpisode + 1);
+  };
+
   return (
     <div className="min-h-screen bg-[var(--bg-color)]">
-      {/* Glass Navbar */}
-      <PlayerNavbar />
+      {!isWebFullscreen && <PlayerNavbar />}
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+      <main className={isWebFullscreen ? '' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20'}>
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="animate-spin rounded-full h-16 w-16 border-4 border-[var(--accent-color)] border-t-transparent mb-4"></div>
@@ -94,36 +116,46 @@ function PlayerContent() {
             onRetry={fetchVideoDetails}
           />
         ) : (
-          <div className="grid lg:grid-cols-3 gap-6">
+          <div className={`grid gap-6 ${isWebFullscreen ? '' : isWideScreen ? 'lg:grid-cols-1' : 'lg:grid-cols-3'}`}>
             {/* Video Player Section */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className={`${isWebFullscreen ? '' : isWideScreen ? '' : 'lg:col-span-2'}`}>
               <VideoPlayer
                 playUrl={playUrl}
                 videoId={videoId || undefined}
                 currentEpisode={currentEpisode}
                 onBack={() => router.back()}
+                onPrevEpisode={handlePrevEpisode}
+                onNextEpisode={handleNextEpisode}
+                hasPrevEpisode={hasPrev}
+                hasNextEpisode={hasNext}
               />
-              <VideoMetadata
-                videoData={videoData}
-                source={source}
-                title={title}
-              />
+              {/* Episode Navigation Buttons */}
             </div>
+            {!isWebFullscreen && (
+              <div className={`${isWideScreen ? '' : 'lg:col-span-2'}`}>
+                <VideoMetadata
+                  videoData={videoData}
+                  source={source}
+                  title={title}
+                />
+              </div>
+            )}
 
             {/* Episodes Sidebar */}
-            <div className="lg:col-span-1">
-              <EpisodeList
-                episodes={videoData?.episodes || null}
-                currentEpisode={currentEpisode}
-                onEpisodeClick={handleEpisodeClick}
-              />
-            </div>
+            {!isWebFullscreen && (
+              <div className={`${isWideScreen ? '' : 'lg:col-span-1 lg:row-span-2 lg:row-start-1 lg:col-start-3'}`}>
+                <EpisodeList
+                  episodes={videoData?.episodes || null}
+                  currentEpisode={currentEpisode}
+                  onEpisodeClick={handleEpisodeClick}
+                />
+              </div>
+            )}
           </div>
         )}
       </main>
 
-      {/* Watch History Sidebar */}
-      <WatchHistorySidebar />
+      {!isWebFullscreen && <WatchHistorySidebar />}
     </div>
   );
 }

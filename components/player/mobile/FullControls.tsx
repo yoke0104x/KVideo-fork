@@ -32,6 +32,10 @@ interface FullControlsProps {
     buttonPadding: string;
     controlsGap: string;
     textSize: string;
+    onPrevEpisode?: () => void;
+    onNextEpisode?: () => void;
+    hasPrevEpisode?: boolean;
+    hasNextEpisode?: boolean;
 }
 
 export function FullControls({
@@ -63,7 +67,11 @@ export function FullControls({
     iconSize,
     buttonPadding,
     controlsGap,
-    textSize
+    textSize,
+    onPrevEpisode,
+    onNextEpisode,
+    hasPrevEpisode,
+    hasNextEpisode
 }: FullControlsProps) {
     return (
         <div className={`flex items-center ${controlsGap}`}>
@@ -84,6 +92,10 @@ export function FullControls({
                 buttonPadding={buttonPadding}
                 textSize={textSize}
                 controlsGap={controlsGap}
+                onPrevEpisode={onPrevEpisode}
+                onNextEpisode={onNextEpisode}
+                hasPrevEpisode={hasPrevEpisode}
+                hasNextEpisode={hasNextEpisode}
             />
 
             <div className="flex-1" />

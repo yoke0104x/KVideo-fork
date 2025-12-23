@@ -12,6 +12,7 @@ interface DesktopVideoPlayerProps {
   poster?: string;
   onError?: (error: string) => void;
   onTimeUpdate?: (currentTime: number, duration: number) => void;
+  onEnded?: () => void;
   initialTime?: number;
   shouldAutoPlay?: boolean;
 }
@@ -21,8 +22,9 @@ export function DesktopVideoPlayer({
   poster,
   onError,
   onTimeUpdate,
+  onEnded,
   initialTime = 0,
-  shouldAutoPlay = false
+  shouldAutoPlay = false,
 }: DesktopVideoPlayerProps) {
   const { refs, state } = useDesktopPlayerState();
   const { currentTime } = state;
@@ -44,6 +46,8 @@ export function DesktopVideoPlayer({
 
   const {
     isPlaying,
+    isWideScreen,
+    isWebFullscreen,
     setShowControls,
     setIsLoading,
   } = state;
@@ -71,7 +75,13 @@ export function DesktopVideoPlayer({
   return (
     <div
       ref={containerRef}
-      className="relative aspect-video bg-black rounded-[var(--radius-2xl)] overflow-hidden group"
+      className={`relative bg-black overflow-hidden group ${
+        isWebFullscreen
+          ? 'fixed h-screen inset-0 z-[9999] rounded-none'
+          : isWideScreen
+            ? 'w-full aspect-video rounded-[var(--radius-2xl)]'
+            : 'aspect-video rounded-[var(--radius-2xl)]'
+      }`}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => isPlaying && setShowControls(false)}
     >
@@ -86,8 +96,9 @@ export function DesktopVideoPlayer({
         onTimeUpdate={handleTimeUpdateEvent}
         onLoadedMetadata={handleLoadedMetadata}
         onError={handleVideoError}
-        onWaiting={() => setIsLoading(true)}
+        onWaiting={() => { if (videoRef.current && videoRef.current.currentTime > 0) setIsLoading(true); }}
         onCanPlay={() => setIsLoading(false)}
+        onEnded={onEnded}
         onClick={togglePlay}
       />
 

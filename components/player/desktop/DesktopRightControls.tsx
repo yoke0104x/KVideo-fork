@@ -10,10 +10,14 @@ interface DesktopRightControlsProps {
     showMoreMenu: boolean;
     isPiPSupported: boolean;
     isAirPlaySupported: boolean;
+    isWideScreen: boolean;
+    isWebFullscreen: boolean;
     isProxied?: boolean;
     onToggleFullscreen: () => void;
     onTogglePictureInPicture: () => void;
     onShowAirPlayMenu: () => void;
+    onToggleWideScreen: () => void;
+    onToggleWebFullscreen: () => void;
     onToggleSpeedMenu: () => void;
     onToggleMoreMenu: () => void;
     onSpeedChange: (speed: number) => void;
@@ -32,10 +36,14 @@ export function DesktopRightControls({
     showMoreMenu,
     isPiPSupported,
     isAirPlaySupported,
+    isWideScreen,
+    isWebFullscreen,
     isProxied,
     onToggleFullscreen,
     onTogglePictureInPicture,
     onShowAirPlayMenu,
+    onToggleWideScreen,
+    onToggleWebFullscreen,
     onToggleSpeedMenu,
     onToggleMoreMenu,
     onSpeedChange,
@@ -93,11 +101,32 @@ export function DesktopRightControls({
                 onCopyLink={onCopyLink}
             />
 
+            {/* Wide Screen */}
+            <button
+                onClick={onToggleWideScreen}
+                className="btn-icon"
+                aria-label={isWideScreen ? 'Exit wide screen' : 'Wide screen'}
+                title={isWideScreen ? '退出宽屏' : '宽屏'}
+            >
+                {isWideScreen ? <Icons.WideScreenExit size={20} /> : <Icons.WideScreen size={20} />}
+            </button>
+
+            {/* Web Fullscreen */}
+            <button
+                onClick={onToggleWebFullscreen}
+                className="btn-icon"
+                aria-label={isWebFullscreen ? 'Exit web fullscreen' : 'Web fullscreen'}
+                title={isWebFullscreen ? '退出网页全屏' : '网页全屏'}
+            >
+                {isWebFullscreen ? <Icons.WebFullscreenExit size={20} /> : <Icons.WebFullscreen size={20} />}
+            </button>
+
             {/* Fullscreen */}
             <button
                 onClick={onToggleFullscreen}
                 className="btn-icon"
                 aria-label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                title={isFullscreen ? '退出全屏' : '全屏'}
             >
                 {isFullscreen ? <Icons.Minimize size={20} /> : <Icons.Maximize size={20} />}
             </button>

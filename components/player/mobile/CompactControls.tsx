@@ -24,6 +24,10 @@ interface CompactControlsProps {
     buttonPadding: string;
     controlsGap: string;
     textSize: string;
+    onPrevEpisode?: () => void;
+    onNextEpisode?: () => void;
+    hasPrevEpisode?: boolean;
+    hasNextEpisode?: boolean;
 }
 
 export function CompactControls({
@@ -47,11 +51,31 @@ export function CompactControls({
     iconSize,
     buttonPadding,
     controlsGap,
-    textSize
+    textSize,
+    onPrevEpisode,
+    onNextEpisode,
+    hasPrevEpisode,
+    hasNextEpisode
 }: CompactControlsProps) {
     return (
         <div className={`flex items-center justify-between ${controlsGap}`}>
             <div className={`flex items-center ${controlsGap} min-w-0`}>
+                {/* Previous Episode */}
+                {onPrevEpisode && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onPrevEpisode();
+                        }}
+                        className={`btn-icon ${buttonPadding} flex-shrink-0 touch-manipulation relative z-[60]`}
+                        aria-label="上一集"
+                        style={{ WebkitTapHighlightColor: 'transparent' }}
+                        disabled={!hasPrevEpisode}
+                    >
+                        <Icons.ChevronLeft size={iconSize} />
+                    </button>
+                )}
+
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
@@ -63,6 +87,22 @@ export function CompactControls({
                 >
                     {isPlaying ? <Icons.Pause size={iconSize} /> : <Icons.Play size={iconSize} />}
                 </button>
+
+                {/* Next Episode */}
+                {onNextEpisode && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onNextEpisode();
+                        }}
+                        className={`btn-icon ${buttonPadding} flex-shrink-0 touch-manipulation relative z-[60]`}
+                        aria-label="下一集"
+                        style={{ WebkitTapHighlightColor: 'transparent' }}
+                        disabled={!hasNextEpisode}
+                    >
+                        <Icons.ChevronRight size={iconSize} />
+                    </button>
+                )}
 
                 <span className={`text-white ${textSize} font-medium tabular-nums whitespace-nowrap`}>
                     {formatTime(currentTime)} / {formatTime(duration)}

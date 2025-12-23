@@ -7,9 +7,13 @@ interface MobileControlsWrapperProps {
     state: ReturnType<typeof useMobilePlayerState>['state'];
     logic: ReturnType<typeof useMobilePlayerLogic>;
     refs: ReturnType<typeof useMobilePlayerState>['refs'];
+    onPrevEpisode?: () => void;
+    onNextEpisode?: () => void;
+    hasPrevEpisode?: boolean;
+    hasNextEpisode?: boolean;
 }
 
-export function MobileControlsWrapper({ src, state, logic, refs }: MobileControlsWrapperProps) {
+export function MobileControlsWrapper({ src, state, logic, refs, onPrevEpisode, onNextEpisode, hasPrevEpisode, hasNextEpisode }: MobileControlsWrapperProps) {
     const {
         isPlaying,
         currentTime,
@@ -89,6 +93,10 @@ export function MobileControlsWrapper({ src, state, logic, refs }: MobileControl
             onProgressTouchEnd={handleProgressTouchEnd}
             formatTime={formatTime}
             speeds={speeds}
+            onPrevEpisode={onPrevEpisode}
+            onNextEpisode={onNextEpisode}
+            hasPrevEpisode={hasPrevEpisode}
+            hasNextEpisode={hasNextEpisode}
         />
     );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Icons } from '@/components/ui/Icon';
@@ -42,6 +42,14 @@ export function EpisodeList({ episodes, currentEpisode, onEpisodeClick }: Episod
     }, [episodes, onEpisodeClick]),
   });
 
+  // Auto scroll current episode into view
+  useEffect(() => {
+    buttonRefs.current[currentEpisode]?.scrollIntoView({
+      behavior: 'auto',
+      block: 'start',
+    });
+  }, [currentEpisode]);
+
   return (
     <Card hover={false} className="lg:sticky lg:top-32">
       <h3 className="text-lg sm:text-xl font-bold text-[var(--text-color)] mb-4 flex items-center gap-2">
@@ -54,7 +62,7 @@ export function EpisodeList({ episodes, currentEpisode, onEpisodeClick }: Episod
 
       <div
         ref={listRef}
-        className="max-h-[400px] sm:max-h-[600px] overflow-y-auto space-y-2 pr-2"
+        className="max-h-[400px] sm:max-h-[600px] overflow-y-auto grid sm:grid-cols-4 grid-cols-6 w-full gap-2"
         role="radiogroup"
         aria-label="剧集选择"
       >
@@ -86,7 +94,7 @@ export function EpisodeList({ episodes, currentEpisode, onEpisodeClick }: Episod
             >
               <div className="flex items-center justify-between">
                 <span className="font-medium text-sm sm:text-base">
-                  {episode.name || `第 ${index + 1} 集`}
+                  {index + 1}
                 </span>
                 {currentEpisode === index && (
                   <Icons.Play size={16} />

@@ -17,6 +17,10 @@ interface MobileVideoPlayerProps {
   onTimeUpdate?: (currentTime: number, duration: number) => void;
   initialTime?: number;
   shouldAutoPlay?: boolean;
+  onPrevEpisode?: () => void;
+  onNextEpisode?: () => void;
+  hasPrevEpisode?: boolean;
+  hasNextEpisode?: boolean;
 }
 
 export function MobileVideoPlayer({
@@ -25,7 +29,11 @@ export function MobileVideoPlayer({
   onError,
   onTimeUpdate,
   initialTime = 0,
-  shouldAutoPlay = false
+  shouldAutoPlay = false,
+  onPrevEpisode,
+  onNextEpisode,
+  hasPrevEpisode,
+  hasNextEpisode
 }: MobileVideoPlayerProps) {
   const { refs, state } = useMobilePlayerState();
   const { currentTime } = state;
@@ -103,7 +111,7 @@ export function MobileVideoPlayer({
         onTimeUpdate={handleTimeUpdateEvent}
         onLoadedMetadata={handleLoadedMetadata}
         onError={handleVideoError}
-        onWaiting={() => setIsLoading(true)}
+        onWaiting={() => { if (videoRef.current && videoRef.current.currentTime > 0) setIsLoading(true); }}
         onCanPlay={() => setIsLoading(false)}
         onTouchEnd={handleTap}
         onClick={(e) => e.preventDefault()}
@@ -129,6 +137,10 @@ export function MobileVideoPlayer({
         state={state}
         logic={logic}
         refs={refs}
+        onPrevEpisode={onPrevEpisode}
+        onNextEpisode={onNextEpisode}
+        hasPrevEpisode={hasPrevEpisode}
+        hasNextEpisode={hasNextEpisode}
       />
     </div>
   );

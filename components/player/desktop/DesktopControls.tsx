@@ -17,6 +17,8 @@ interface DesktopControlsProps {
     showVolumeBar: boolean;
     isPiPSupported: boolean;
     isAirPlaySupported: boolean;
+    isWideScreen: boolean;
+    isWebFullscreen: boolean;
     isProxied?: boolean;
     progressBarRef: React.RefObject<HTMLDivElement | null>;
     volumeBarRef: React.RefObject<HTMLDivElement | null>;
@@ -29,6 +31,8 @@ interface DesktopControlsProps {
     onToggleFullscreen: () => void;
     onTogglePictureInPicture: () => void;
     onShowAirPlayMenu: () => void;
+    onToggleWideScreen: () => void;
+    onToggleWebFullscreen: () => void;
     onToggleSpeedMenu: () => void;
     onToggleMoreMenu: () => void;
     onSpeedChange: (speed: number) => void;

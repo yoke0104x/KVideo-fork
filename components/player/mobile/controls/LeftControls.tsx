@@ -19,6 +19,10 @@ interface LeftControlsProps {
     buttonPadding: string;
     textSize: string;
     controlsGap: string;
+    onPrevEpisode?: () => void;
+    onNextEpisode?: () => void;
+    hasPrevEpisode?: boolean;
+    hasNextEpisode?: boolean;
 }
 
 export function LeftControls({
@@ -38,9 +42,29 @@ export function LeftControls({
     buttonPadding,
     textSize,
     controlsGap,
+    onPrevEpisode,
+    onNextEpisode,
+    hasPrevEpisode,
+    hasNextEpisode
 }: LeftControlsProps) {
     return (
         <div className={`flex items-center ${controlsGap}`}>
+            {/* Previous Episode */}
+            {onPrevEpisode && (
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onPrevEpisode();
+                    }}
+                    className={`btn-icon ${buttonPadding} flex-shrink-0 touch-manipulation`}
+                    aria-label="上一集"
+                    style={{ WebkitTapHighlightColor: 'transparent' }}
+                    disabled={!hasPrevEpisode}
+                >
+                    <Icons.ChevronLeft size={iconSize} />
+                </button>
+            )}
+
             <button
                 onClick={(e) => {
                     e.stopPropagation();
@@ -52,6 +76,22 @@ export function LeftControls({
             >
                 {isPlaying ? <Icons.Pause size={iconSize} /> : <Icons.Play size={iconSize} />}
             </button>
+
+            {/* Next Episode */}
+            {onNextEpisode && (
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onNextEpisode();
+                    }}
+                    className={`btn-icon ${buttonPadding} flex-shrink-0 touch-manipulation`}
+                    aria-label="下一集"
+                    style={{ WebkitTapHighlightColor: 'transparent' }}
+                    disabled={!hasNextEpisode}
+                >
+                    <Icons.ChevronRight size={iconSize} />
+                </button>
+            )}
 
             <button
                 onClick={(e) => {

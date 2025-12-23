@@ -33,7 +33,7 @@ export function DesktopLeftControls({
     onToggleMute,
     onVolumeChange,
     onVolumeMouseDown,
-    formatTime
+    formatTime,
 }: DesktopLeftControlsProps) {
     return (
         <div className="flex items-center gap-3">

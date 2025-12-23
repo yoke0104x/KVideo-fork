@@ -5,6 +5,10 @@ interface UseFullscreenControlsProps {
     videoRef: React.RefObject<HTMLVideoElement | null>;
     isFullscreen: boolean;
     setIsFullscreen: (fullscreen: boolean) => void;
+    isWideScreen: boolean;
+    setIsWideScreen: (wide: boolean) => void;
+    isWebFullscreen: boolean;
+    setIsWebFullscreen: (webFullscreen: boolean) => void;
     isPiPSupported: boolean;
     isAirPlaySupported: boolean;
     setIsPiPSupported: (supported: boolean) => void;
@@ -16,6 +20,10 @@ export function useFullscreenControls({
     videoRef,
     isFullscreen,
     setIsFullscreen,
+    isWideScreen,
+    setIsWideScreen,
+    isWebFullscreen,
+    setIsWebFullscreen,
     isPiPSupported,
     isAirPlaySupported,
     setIsPiPSupported,
@@ -72,9 +80,19 @@ export function useFullscreenControls({
         }
     }, [videoRef, isAirPlaySupported]);
 
+    const toggleWideScreen = useCallback(() => {
+        setIsWideScreen(!isWideScreen);
+    }, [isWideScreen, setIsWideScreen]);
+
+    const toggleWebFullscreen = useCallback(() => {
+        setIsWebFullscreen(!isWebFullscreen);
+    }, [isWebFullscreen, setIsWebFullscreen]);
+
     return {
         toggleFullscreen,
         togglePictureInPicture,
-        showAirPlayMenu
+        showAirPlayMenu,
+        toggleWideScreen,
+        toggleWebFullscreen
     };
 }

@@ -36,6 +36,10 @@ interface MobileControlsProps {
     onProgressTouchEnd: (e: React.TouchEvent<HTMLDivElement>) => void;
     formatTime: (seconds: number) => string;
     speeds: number[];
+    onPrevEpisode?: () => void;
+    onNextEpisode?: () => void;
+    hasPrevEpisode?: boolean;
+    hasNextEpisode?: boolean;
 }
 
 export function MobileControls(props: MobileControlsProps) {
@@ -49,17 +53,6 @@ export function MobileControls(props: MobileControlsProps) {
         onProgressTouchStart,
         onProgressTouchMove,
         onProgressTouchEnd,
-        showVolumeMenu,
-        showSpeedMenu,
-        isMuted,
-        volume,
-        playbackRate,
-        speeds,
-        onToggleMute,
-        onVolumeChange,
-        onSpeedChange,
-        onToggleVolumeMenu,
-        onToggleSpeedMenu
     } = props;
 
     const iconSize = isCompactLayout ? 20 : 22;

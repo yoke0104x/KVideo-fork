@@ -96,4 +96,30 @@ export const MediaIcons = {
             <polygon points="12 15 17 21 7 21 12 15" />
         </svg>
     ),
+
+    WideScreen: ({ className = "", size = 24 }: IconProps) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <rect x="2" y="6" width="20" height="12" rx="2" />
+        </svg>
+    ),
+
+    WideScreenExit: ({ className = "", size = 24 }: IconProps) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <rect x="4" y="4" width="16" height="16" rx="2" />
+        </svg>
+    ),
+
+    WebFullscreen: ({ className = "", size = 24 }: IconProps) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
+        </svg>
+    ),
+
+    WebFullscreenExit: ({ className = "", size = 24 }: IconProps) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <rect x="5" y="5" width="14" height="14" rx="2" />
+            <path d="M5 12h14M12 5v14" />
+        </svg>
+    ),
 };

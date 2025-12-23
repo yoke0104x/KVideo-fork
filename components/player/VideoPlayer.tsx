@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card } from '@/components/ui/Card';
 import { useHistoryStore } from '@/lib/store/history-store';
+import { usePlayerStore } from '@/lib/store/player-store';
 import { CustomVideoPlayer } from './CustomVideoPlayer';
 import { VideoPlayerError } from './VideoPlayerError';
 import { VideoPlayerEmpty } from './VideoPlayerEmpty';
@@ -13,14 +14,18 @@ interface VideoPlayerProps {
   videoId?: string;
   currentEpisode: number;
   onBack: () => void;
+  onNextEpisode?: () => void;
+  hasNextEpisode?: boolean;
 }
 
-export function VideoPlayer({ playUrl, videoId, currentEpisode, onBack }: VideoPlayerProps) {
+export function VideoPlayer({ playUrl, videoId, currentEpisode, onBack, onNextEpisode, hasNextEpisode }: VideoPlayerProps) {
   const [videoError, setVideoError] = useState<string>('');
   const [useProxy, setUseProxy] = useState(false);
   const [shouldAutoPlay, setShouldAutoPlay] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
   const MAX_MANUAL_RETRIES = 20;
+
+  const { isWebFullscreen } = usePlayerStore();
 
   // Use reactive hook to subscribe to history updates
   // This ensures the component re-renders when history is hydrated from localStorage
@@ -113,26 +118,33 @@ export function VideoPlayer({ playUrl, videoId, currentEpisode, onBack }: VideoP
     return <VideoPlayerEmpty />;
   }
 
+  const playerContent = videoError ? (
+    <VideoPlayerError
+      error={videoError}
+      onBack={onBack}
+      onRetry={handleRetry}
+      retryCount={retryCount}
+      maxRetries={MAX_MANUAL_RETRIES}
+    />
+  ) : (
+    <CustomVideoPlayer
+      key={`${useProxy ? 'proxy' : 'direct'}-${retryCount}`}
+      src={finalPlayUrl}
+      onError={handleVideoError}
+      onTimeUpdate={handleTimeUpdate}
+      onEnded={hasNextEpisode ? onNextEpisode : undefined}
+      initialTime={getSavedProgress()}
+      shouldAutoPlay={shouldAutoPlay}
+    />
+  );
+
+  if (isWebFullscreen) {
+    return playerContent;
+  }
+
   return (
     <Card hover={false} className="p-0 overflow-hidden">
-      {videoError ? (
-        <VideoPlayerError
-          error={videoError}
-          onBack={onBack}
-          onRetry={handleRetry}
-          retryCount={retryCount}
-          maxRetries={MAX_MANUAL_RETRIES}
-        />
-      ) : (
-        <CustomVideoPlayer
-          key={`${useProxy ? 'proxy' : 'direct'}-${retryCount}`} // Force remount when switching modes or retrying
-          src={finalPlayUrl}
-          onError={handleVideoError}
-          onTimeUpdate={handleTimeUpdate}
-          initialTime={getSavedProgress()}
-          shouldAutoPlay={shouldAutoPlay}
-        />
-      )}
+      {playerContent}
     </Card>
   );
 }

@@ -9,6 +9,7 @@ interface CustomVideoPlayerProps {
   poster?: string;
   onError?: (error: string) => void;
   onTimeUpdate?: (currentTime: number, duration: number) => void;
+  onEnded?: () => void;
   initialTime?: number;
   shouldAutoPlay?: boolean;
 }
